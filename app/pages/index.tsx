@@ -83,6 +83,11 @@ export default function DashboardScreen() {
     </TouchableOpacity>
   );
   console.log("DashboardScreen rendered");
+  // return (
+  //   <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 16 }}>
+  //     Dashboard
+  //   </Text>
+  // );
   return (
     <View style={styles.container}>
       <FlatList

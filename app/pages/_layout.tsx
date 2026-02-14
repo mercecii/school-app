@@ -1,14 +1,27 @@
 import { Drawer } from "expo-router/drawer";
-import { Text, View } from "react-native";
+import { Text, View, useWindowDimensions } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+import { StatusBar } from "expo-status-bar";
+import CustomHeader from "../components/CustomHeader";
 
 export default function RootLayoutLevel2() {
   console.log("RootLayoutLevel2 rendered");
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer>
-        <Drawer.Screen name="index" options={{ title: "Dashboard" }} />
+      <StatusBar style="dark" />
+      <Drawer
+        screenOptions={{
+          headerTitle: () => <CustomHeader />,
+        }}
+      >
+        <Drawer.Screen
+          name="index"
+          options={{
+            title: "Dashboard",
+          }}
+        />
         <Drawer.Screen name="calendar" options={{ title: "Calendar" }} />
         <Drawer.Screen name="attendance" options={{ title: "Attendance" }} />
         <Drawer.Screen name="homework" options={{ title: "Homework" }} />
@@ -35,7 +48,6 @@ export default function RootLayoutLevel2() {
   );
 }
 
-// Custom header component for subtitle support
 function HeaderWithSubtitle({
   title,
   subtitle,
@@ -43,10 +55,20 @@ function HeaderWithSubtitle({
   title: string;
   subtitle: string;
 }) {
+  const { width } = useWindowDimensions();
   return (
-    <View style={{ padding: 16, backgroundColor: "#fff" }}>
-      <Text style={{ fontSize: 20, fontWeight: "bold" }}>{title}</Text>
-      <Text style={{ fontSize: 14, color: "#666" }}>{subtitle}</Text>
+    <View
+      style={{
+        width: width - 32, // leave margin for drawer icon and padding
+        maxWidth: 600,
+        alignSelf: "center",
+        paddingVertical: 8,
+        paddingHorizontal: 0,
+        backgroundColor: "#fff",
+      }}
+    >
+      <Text style={{ fontSize: 22, fontWeight: "bold" }}>{title}</Text>
+      <Text style={{ fontSize: 15, color: "#666" }}>{subtitle}</Text>
     </View>
   );
 }
