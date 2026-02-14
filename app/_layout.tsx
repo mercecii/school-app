@@ -1,36 +1,46 @@
-import { Drawer } from "expo-router/drawer";
+import { useEffect } from "react";
 import { Text, View } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { auth } from "./firebase/firebase";
 
 export default function RootLayout() {
-  console.log("RootLayout rendered");
+  useEffect(() => {
+    console.log("RootLayout mounted");
+    return () => {
+      console.log("RootLayout unmounted");
+    };
+  }, []);
+  useEffect(() => {
+    console.log("Firebase App:", auth.app.name);
+  }, []);
+  // const [user, setUser] = useState<any>(null);
+  // const [loading, setLoading] = useState(true);
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, (u) => {
+  //     debugger;
+  //     console.log("Auth state changed:", u);
+  //     setUser(u);
+  //     setLoading(false);
+  //   });
+
+  //    return unsubscribe;
+  // }, []);
+
+  // if (loading) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: "center" }}>
+  //       <ActivityIndicator size="large" />
+  //     </View>
+  //   );
+  // }
+
+  // if (!user) {
+  //   return <Redirect href="/login" />;
+  // }
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer>
-        <Drawer.Screen name="index" options={{ title: "Dashboard" }} />
-        <Drawer.Screen name="calendar" options={{ title: "Calendar" }} />
-        <Drawer.Screen name="attendance" options={{ title: "Attendance" }} />
-        <Drawer.Screen name="homework" options={{ title: "Homework" }} />
-        <Drawer.Screen name="notes" options={{ title: "Academic Notes" }} />
-        <Drawer.Screen name="video" options={{ title: "Academic Video" }} />
-        <Drawer.Screen
-          name="previous-year-question-paper"
-          options={{ title: "Previous Year Question Paper" }}
-        />
-        <Drawer.Screen name="apply-leave" options={{ title: "Apply Leave" }} />
-        <Drawer.Screen
-          name="daily-timetable"
-          options={{ title: "Daily Timetable" }}
-        />
-        <Drawer.Screen name="download" options={{ title: "Download" }} />
-        <Drawer.Screen name="fees" options={{ title: "Fees" }} />
-        <Drawer.Screen
-          name="news-gallery"
-          options={{ title: "News & Gallery" }}
-        />
-        <Drawer.Screen name="video-page" options={{ title: "Video" }} />
-      </Drawer>
-    </GestureHandlerRootView>
+    <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>
+      Welcome to the app!
+    </Text>
   );
 }
 

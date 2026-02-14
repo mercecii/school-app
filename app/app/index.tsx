@@ -127,17 +127,3 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-
-// export default function Index() {
-//   return (
-//     <View
-//       style={{
-//         flex: 1,
-//         justifyContent: "center",
-//         alignItems: "center",
-//       }}
-//     >
-//       <Text>Body of index.tsx</Text>
-//     </View>
-//   );
-// }
