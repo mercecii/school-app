@@ -9,12 +9,16 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
-
+  console.log(
+    "Login component rendered. Current auth state:",
+    auth.currentUser,
+  );
   const handleLogin = async () => {
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.replace("/"); // Redirect to home
+      console.log("Login successful, redirecting to /pages");
+      router.replace("/pages"); // Redirect to pages layout
     } catch (err) {
       setError("Invalid email or password");
     }

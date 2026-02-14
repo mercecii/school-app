@@ -1,10 +1,11 @@
-import { Slot } from "expo-router";
+import { Slot, useRouter } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { auth } from "../firebase/firebase";
 
 export default function RootLayout() {
+  const router = useRouter();
   useEffect(() => {
     console.log("RootLayout mounted");
     return () => {
@@ -19,8 +20,12 @@ export default function RootLayout() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       debugger;
-      console.log("Auth state changed:", u);
-      // setUser(u);
+      console.log("Auth state changed:", u?.email);
+
+      if (u?.email) {
+        console.log("User is authenticated, redirecting to /pages");
+        router.replace("/about"); // Redirect to pages layout
+      }
       // setLoading(false);
     });
 
@@ -41,13 +46,13 @@ export default function RootLayout() {
 
   return (
     <View style={styles.container}>
-      <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>
+      {/* <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>
         <div style={{ color: "#000", border: "1px solid #ccc" }}>
           Welcome to the app!
-        </div>
-        <Slot />{" "}
-        {/* This will render the child routes (e.g., /home, /homework) */}
-      </Text>
+        </div> */}
+      <Slot />
+      {/* This will render the child routes (e.g., /home, /homework) */}
+      {/* </Text> */}
     </View>
   );
 }
