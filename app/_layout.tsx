@@ -1,6 +1,7 @@
 import { Slot } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { auth } from "../firebase/firebase";
 
 export default function RootLayout() {
@@ -11,20 +12,20 @@ export default function RootLayout() {
     };
   }, []);
   useEffect(() => {
-    console.log("Firebase App:", auth.app);
+    console.log("Firebase Auth:", auth);
   }, []);
   // const [user, setUser] = useState<any>(null);
   // const [loading, setLoading] = useState(true);
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, (u) => {
-  //     debugger;
-  //     console.log("Auth state changed:", u);
-  //     setUser(u);
-  //     setLoading(false);
-  //   });
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      debugger;
+      console.log("Auth state changed:", u);
+      // setUser(u);
+      // setLoading(false);
+    });
 
-  //    return unsubscribe;
-  // }, []);
+    return unsubscribe;
+  }, []);
 
   // if (loading) {
   //   return (
@@ -39,13 +40,26 @@ export default function RootLayout() {
   // }
 
   return (
-    <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>
-      Welcome to the app!
-      <Slot />{" "}
-      {/* This will render the child routes (e.g., /home, /homework) */}
-    </Text>
+    <View style={styles.container}>
+      <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>
+        <div style={{ color: "#000", border: "1px solid #ccc" }}>
+          Welcome to the app!
+        </div>
+        <Slot />{" "}
+        {/* This will render the child routes (e.g., /home, /homework) */}
+      </Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f5f6fa",
+  },
+});
 
 // Custom header component for subtitle support
 function HeaderWithSubtitle({

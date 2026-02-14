@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { initializeAuth } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -14,7 +14,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // ✅ Proper React Native auth with persistence
-export const auth = initializeAuth(app, {});
+export const auth = getAuth(app);
+// Auth emulator removed for production
+// connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
 
 // Firestore
 export const db = getFirestore(app);
