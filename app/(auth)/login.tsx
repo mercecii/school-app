@@ -24,7 +24,7 @@ export default function Login() {
       const tempt = await signInWithEmailAndPassword(auth, email, password);
       console.log("Login successful:", tempt.user.email);
 
-      router.replace("/pages");
+      // router.replace("/pages");
     } catch (err) {
       setError("Invalid email or password");
     }

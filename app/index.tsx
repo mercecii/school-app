@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import React, { useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { auth } from "./firebaseSetup/firebaseSetup";
 
 const Index = () => {
@@ -53,7 +53,7 @@ const Index = () => {
           <div style={{ color: "#000", border: "1px solid #ccc" }}>
             Welcome to the app!
           </div> */}
-      Hi
+      <Text>Hi</Text>
       {/* This will render the child routes (e.g., /home, /homework) */}
       {/* </Text> */}
     </View>
