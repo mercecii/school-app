@@ -7,13 +7,28 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer>
+        <Drawer.Screen name="index" options={{ title: "Dashboard" }} />
+        <Drawer.Screen name="calendar" options={{ title: "Calendar" }} />
+        <Drawer.Screen name="attendance" options={{ title: "Attendance" }} />
+        <Drawer.Screen name="homework" options={{ title: "Homework" }} />
+        <Drawer.Screen name="notes" options={{ title: "Academic Notes" }} />
+        <Drawer.Screen name="video" options={{ title: "Academic Video" }} />
         <Drawer.Screen
-          name="index"
-          options={{
-            title: "DASHBOARD",
-          }}
+          name="previous-year-question-paper"
+          options={{ title: "Previous Year Question Paper" }}
         />
-        <Drawer.Screen name="about" options={{ title: "About Us" }} />
+        <Drawer.Screen name="apply-leave" options={{ title: "Apply Leave" }} />
+        <Drawer.Screen
+          name="daily-timetable"
+          options={{ title: "Daily Timetable" }}
+        />
+        <Drawer.Screen name="download" options={{ title: "Download" }} />
+        <Drawer.Screen name="fees" options={{ title: "Fees" }} />
+        <Drawer.Screen
+          name="news-gallery"
+          options={{ title: "News & Gallery" }}
+        />
+        <Drawer.Screen name="video-page" options={{ title: "Video" }} />
       </Drawer>
     </GestureHandlerRootView>
   );
