@@ -1,6 +1,7 @@
+import { Slot } from "expo-router";
 import { useEffect } from "react";
 import { Text, View } from "react-native";
-import { auth } from "./firebase/firebase";
+import { auth } from "../firebase/firebase";
 
 export default function RootLayout() {
   useEffect(() => {
@@ -10,7 +11,7 @@ export default function RootLayout() {
     };
   }, []);
   useEffect(() => {
-    console.log("Firebase App:", auth.app.name);
+    console.log("Firebase App:", auth.app);
   }, []);
   // const [user, setUser] = useState<any>(null);
   // const [loading, setLoading] = useState(true);
@@ -40,6 +41,8 @@ export default function RootLayout() {
   return (
     <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>
       Welcome to the app!
+      <Slot />{" "}
+      {/* This will render the child routes (e.g., /home, /homework) */}
     </Text>
   );
 }
