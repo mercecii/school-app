@@ -23,6 +23,7 @@ export default function AdminNotifications() {
       targetType: "ALL",
       createdBy: auth.currentUser?.uid,
       createdAt: serverTimestamp(),
+      isActive: true,
     });
   };
 

@@ -14,11 +14,17 @@ const CustomHeader = () => {
         const uid = auth.currentUser.uid;
         const userDoc = doc(db, "students", uid);
         console.log("userDoc", userDoc);
-        const docSnap = await getDoc(userDoc);
-        console.log("docSnap", docSnap);
-        if (docSnap.exists()) {
-          console.log("docsnap.data()    fetched:", docSnap.data());
-          setFullname(docSnap.data().fullname || "");
+        const userDocSnap = await getDoc(userDoc);
+        console.log("docSnap", userDocSnap);
+        if (userDocSnap.exists()) {
+          console.log("docsnap.data()    fetched:", userDocSnap.data());
+          setFullname(userDocSnap.data().fullname || "");
+        }
+        const adminDoc = doc(db, "admins", uid);
+        const adminDocSnap = await getDoc(adminDoc);
+        if (adminDocSnap.exists()) {
+          console.log("docsnap.data()    fetched:", adminDocSnap.data());
+          setFullname(adminDocSnap.data().fullname || "");
         }
       }
     };
@@ -37,7 +43,7 @@ const CustomHeader = () => {
     >
       <Text style={{ fontWeight: "600", display: "flex" }}>SSR Juniors</Text>
       <Text style={{ fontWeight: "600", display: "flex" }}>
-        {/* {auth?.currentUser?.email || "No user logged in"} */}
+        {auth?.currentUser?.email || "No user logged in"}
         {auth?.currentUser ? (
           <Text style={{ color: "blue", marginLeft: 8 }}>{fullname}</Text>
         ) : null}
