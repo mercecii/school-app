@@ -8,9 +8,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSelector } from "react-redux";
 import { auth, db } from "../firebaseSetup/firebaseSetup";
+import { AppState } from "../store/store";
 
 export default function AdminNotifications() {
+  const userInfo = useSelector((state: AppState) => state.auth.userInfo);
   console.log("eee: app/admin/index.tsx");
 
   const [title, setTitle] = useState("");
@@ -27,10 +30,14 @@ export default function AdminNotifications() {
     });
   };
 
+  console.log("eee: app/admin/index.tsx | user:", userInfo);
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
         <Text style={styles.heading}>Send Notification</Text>
+        <Text style={styles.subHeading}>
+          Hi {userInfo?.fullName || "Admin"},
+        </Text>
         <Text style={styles.subHeading}>
           Publish announcements to all students & parents
         </Text>

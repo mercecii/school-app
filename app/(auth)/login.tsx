@@ -46,8 +46,13 @@ export default function Login() {
       if (temp.user.email) {
         const email = temp.user.email;
         console.log("Logged in user email:", email);
-
-        // router.replace("/pages/dashboard");
+        const role = await getRoleAsync(temp.user.uid);
+        console.log("User role:", role);
+        if (role === "admin") {
+          router.replace("/admin");
+        } else {
+          router.replace("/pages/dashboard");
+        }
       }
     } catch (err) {
       setError("Invalid email or password");

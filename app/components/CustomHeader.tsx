@@ -1,35 +1,13 @@
-import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { auth, db } from "./../firebaseSetup/firebaseSetup";
+import { useSelector } from "react-redux";
+import { AppState } from "../store/store";
+import { auth } from "./../firebaseSetup/firebaseSetup";
 
 const CustomHeader = () => {
   console.log("CustomHeader rendered | auth = ", auth);
+  const { userInfo } = useSelector((state: AppState) => state.auth);
+  console.log("CustomHeader rendered | auth.currentUser = ", userInfo);
 
-  const [fullname, setFullname] = useState("");
-
-  useEffect(() => {
-    const fetchFullname = async () => {
-      if (auth.currentUser) {
-        const uid = auth.currentUser.uid;
-        const userDoc = doc(db, "students", uid);
-        console.log("userDoc", userDoc);
-        const userDocSnap = await getDoc(userDoc);
-        console.log("docSnap", userDocSnap);
-        if (userDocSnap.exists()) {
-          console.log("docsnap.data()    fetched:", userDocSnap.data());
-          setFullname(userDocSnap.data().fullname || "");
-        }
-        const adminDoc = doc(db, "admins", uid);
-        const adminDocSnap = await getDoc(adminDoc);
-        if (adminDocSnap.exists()) {
-          console.log("docsnap.data()    fetched:", adminDocSnap.data());
-          setFullname(adminDocSnap.data().fullname || "");
-        }
-      }
-    };
-    fetchFullname();
-  }, []);
   return (
     <View
       style={{
@@ -45,7 +23,10 @@ const CustomHeader = () => {
       <Text style={{ fontWeight: "600", display: "flex" }}>
         {auth?.currentUser?.email || "No user logged in"}
         {auth?.currentUser ? (
-          <Text style={{ color: "blue", marginLeft: 8 }}>{fullname}</Text>
+          <Text style={{ color: "blue", marginLeft: 8 }}>
+            {userInfo?.fullname || "No name available"}
+            {userInfo?.phone || "No name available"}
+          </Text>
         ) : null}
       </Text>
     </View>

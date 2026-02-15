@@ -43,7 +43,6 @@ const Index = () => {
 
   console.log("Current user:", user);
   console.log("User role state:", userRole);
-  // If not logged in and NOT already on login → redirect to login
   if (!user && !isInsideAuthRouteSegment) {
     console.log("User not logged in, redirecting to login page.");
     return <Redirect href="/(auth)/login" />;
@@ -56,17 +55,6 @@ const Index = () => {
     console.log("redirecting from app/index.tsx");
     return <Redirect href="/pages/dashboard" />;
   }
-
-  // If logged in and currently in auth → redirect to pages
 };
-
-// const _styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     alignItems: "center",
-//     justifyContent: "center",
-//     backgroundColor: "red",
-//   },
-// });
 
 export default Index;
