@@ -1,7 +1,10 @@
 import { Drawer } from "expo-router/drawer";
 // ...existing code...
+import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { signOut } from "firebase/auth";
 import { useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import CustomHeader from "../components/CustomHeader";
@@ -9,24 +12,16 @@ import { auth } from "../firebaseSetup/firebaseSetup";
 
 export default function RootLayoutLevel2() {
   const [fullname, setFullname] = useState("");
+  const router = useRouter();
+  const [menuVisible, setMenuVisible] = useState(false);
 
-  // useEffect(() => {
-  //   const fetchFullname = async () => {
-  //     if (auth.currentUser) {
-  //       const uid = auth.currentUser.uid;
-  //       const userDoc = doc(db, "students", uid);
-  //       console.log("userDoc", userDoc);
-  //       const docSnap = await getDoc(userDoc);
-  //       console.log("docSnap", docSnap);
-  //       if (docSnap.exists()) {
-  //         setFullname(docSnap.data().fullname || "");
-  //       }
-  //     }
-  //   };
-  //   fetchFullname();
-  // }, []);
   console.log("RootLayoutLevel2 rendered", auth.currentUser, fullname);
-  console.log();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    setMenuVisible(false);
+    router.replace("/(auth)/login");
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -34,6 +29,45 @@ export default function RootLayoutLevel2() {
       <Drawer
         screenOptions={{
           headerTitle: () => <CustomHeader />,
+          headerRight: () => (
+            <View style={{ marginRight: 16 }}>
+              <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
+                <Icon name="account-circle-outline" size={26} />
+              </TouchableOpacity>
+
+              {menuVisible && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 40,
+                    right: 0,
+                    backgroundColor: "white",
+                    borderRadius: 6,
+                    elevation: 5,
+                    paddingVertical: 8,
+                    width: 150,
+                  }}
+                >
+                  <TouchableOpacity
+                    style={{ padding: 10 }}
+                    onPress={() => {
+                      setMenuVisible(false);
+                      router.push("/pages/profile");
+                    }}
+                  >
+                    <Text>My Profile</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={{ padding: 10 }}
+                    onPress={handleLogout}
+                  >
+                    <Text style={{ color: "red" }}>Logout</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          ),
         }}
       >
         <Drawer.Screen

@@ -185,6 +185,18 @@ const dashboardItems = [
       <MaterialCommunityIcons name="cash-multiple" size={48} color="#8bc34a" />
     ),
   },
+  {
+    key: "syllabus",
+    route: "syllabus",
+    label: "SYLLABUS",
+    icon: (
+      <MaterialCommunityIcons
+        name="file-document-edit"
+        size={48}
+        color="#3f51b5"
+      />
+    ),
+  },
 ];
 
 export default function DashboardScreen() {
