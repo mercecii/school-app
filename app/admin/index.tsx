@@ -4,6 +4,8 @@ import { Button, TextInput, View } from "react-native";
 import { auth, db } from "../firebaseSetup/firebaseSetup";
 
 export default function AdminNotifications() {
+  console.log("eee: app/admin/index.tsx");
+
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
 

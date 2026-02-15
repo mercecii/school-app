@@ -1,63 +1,48 @@
-import { useRouter } from "expo-router";
-import { onAuthStateChanged } from "firebase/auth";
-import React, { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { auth } from "./firebaseSetup/firebaseSetup";
+import { Redirect, useSegments } from "expo-router";
+
+import { doc, getDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { StyleSheet } from "react-native";
+import { auth, db } from "./firebaseSetup/firebaseSetup";
 
 const Index = () => {
-  const router = useRouter();
-  useEffect(() => {
-    console.log("RootLayout mounted");
-    return () => {
-      console.log("RootLayout unmounted");
-    };
-  }, []);
+  const [userRole, setUserRole] = useState<string>("student");
+  const segments = useSegments();
+  const user = auth.currentUser;
+
+  console.log("eee: app/index.tsx");
+  const getRoleAsync = async (uid: string) => {
+    try {
+      console.log("getRoleAsync called with uid:", uid);
+      const studentsDoc = await getDoc(doc(db, "students", uid));
+      const adminsDoc = await getDoc(doc(db, "admins", uid));
+      console.log({ studentsDoc, adminsDoc });
+      // return doc.data()?.role || "user";
+      console.log("Admin doc exists:", adminsDoc.exists());
+      if (adminsDoc.exists()) {
+        return "admin";
+      }
+      return "student";
+    } catch (e) {
+      console.error("Error fetching user role:", e);
+      return "student";
+    }
+  };
+  console.log("eee: app/index.tsx");
   useEffect(() => {
     console.log("Firebase Auth:", auth);
   }, []);
-  // const [user, setUser] = useState<any>(null);
-  // const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      debugger;
-      console.log("Auth state changed:", u?.email);
 
-      if (u?.email) {
-        console.log("User is authenticated, redirecting to /pages");
-        router.replace("/pages"); // Redirect to pages layout
-      } else {
-        console.log("No authenticated user, redirecting to /login");
-        router.replace("/login"); // Redirect to login page
-      }
-      // setLoading(false);
-    });
+  console.log("Segments:", segments);
+  const isInsideAuthRouteSegment = segments[0] === "(auth)";
 
-    return unsubscribe;
-  }, []);
+  // If not logged in and NOT already on login → redirect to login
+  if (!user && !isInsideAuthRouteSegment) {
+    console.log("User not logged in, redirecting to login page.");
+    return <Redirect href="/(auth)/login" />;
+  }
 
-  // if (loading) {
-  //   return (
-  //     <View style={{ flex: 1, justifyContent: "center" }}>
-  //       <ActivityIndicator size="large" />
-  //     </View>
-  //   );
-  // }
-
-  // if (!user) {
-  //   return <Redirect href="/login" />;
-  // }
-
-  return (
-    <View style={styles.container}>
-      {/* <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>
-          <div style={{ color: "#000", border: "1px solid #ccc" }}>
-            Welcome to the app!
-          </div> */}
-      <Text>Hi</Text>
-      {/* This will render the child routes (e.g., /home, /homework) */}
-      {/* </Text> */}
-    </View>
-  );
+  // If logged in and currently in auth → redirect to pages
 };
 
 const styles = StyleSheet.create({

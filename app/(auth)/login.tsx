@@ -13,6 +13,8 @@ import {
 import { auth } from "../firebaseSetup/firebaseSetup";
 
 export default function Login() {
+  console.log("eee: app/(auth)/login.tsx");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,10 +23,11 @@ export default function Login() {
   const handleLogin = async () => {
     setError("");
     try {
-      const tempt = await signInWithEmailAndPassword(auth, email, password);
-      console.log("Login successful:", tempt.user.email);
-
-      // router.replace("/pages");
+      const temp = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Login successful:", temp.user.email);
+      if (temp.user.email) {
+        router.replace("/pages/dashboard");
+      }
     } catch (err) {
       setError("Invalid email or password");
     }

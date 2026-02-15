@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useUser } from "../context/UserContext";
 
 const dashboardItems = [
   {
@@ -200,6 +201,8 @@ const dashboardItems = [
 ];
 
 export default function DashboardScreen() {
+  const user = useUser();
+  console.log("eee: app/pages/dashboard.tsx | user from context:", user);
   const renderItem = ({ item }) => (
     <TouchableOpacity
       onPress={() => {
