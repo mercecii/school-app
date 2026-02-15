@@ -6,6 +6,7 @@ import { signOut } from "firebase/auth";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+// @ts-ignore
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import CustomHeader from "../components/CustomHeader";
 import { UserContext } from "../context/UserContext";
@@ -13,7 +14,7 @@ import { auth } from "../firebaseSetup/firebaseSetup";
 
 export default function RootLayoutLevel2() {
   console.log("eee: app/pages/_layout.tsx");
-  const [fullname, setFullname] = useState("");
+  const fullname = "";
   const router = useRouter();
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -26,7 +27,7 @@ export default function RootLayoutLevel2() {
   };
 
   return (
-    <UserContext.Provider value={{ fullname }}>
+    <UserContext.Provider value={auth.currentUser}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <StatusBar style="dark" />
         <Drawer

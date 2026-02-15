@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -10,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { auth } from "../firebaseSetup/firebaseSetup";
+import { auth, db } from "../firebaseSetup/firebaseSetup";
 
 export default function Login() {
   console.log("eee: app/(auth)/login.tsx");
@@ -20,13 +21,33 @@ export default function Login() {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  const getRoleAsync = async (uid: string) => {
+    try {
+      console.log("getRoleAsync called with uid:", uid);
+      const studentsDoc = await getDoc(doc(db, "students", uid));
+      const adminsDoc = await getDoc(doc(db, "admins", uid));
+      console.log({ studentsDoc, adminsDoc });
+      // return doc.data()?.role || "user";
+      console.log("Admin doc exists:", adminsDoc.exists());
+      if (adminsDoc.exists()) {
+        return "admin";
+      }
+      return "student";
+    } catch (e) {
+      console.error("Error fetching user role:", e);
+      return "student";
+    }
+  };
   const handleLogin = async () => {
     setError("");
     try {
       const temp = await signInWithEmailAndPassword(auth, email, password);
       console.log("Login successful:", temp.user.email);
       if (temp.user.email) {
-        router.replace("/pages/dashboard");
+        const email = temp.user.email;
+        console.log("Logged in user email:", email);
+
+        // router.replace("/pages/dashboard");
       }
     } catch (err) {
       setError("Invalid email or password");

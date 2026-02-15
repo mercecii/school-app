@@ -72,6 +72,7 @@ const dashboardItems = [
     label: "CIRCULAR",
     icon: (
       <MaterialCommunityIcons
+        // @ts-ignore
         name="file-document-box-multiple"
         size={48}
         color="#00bcd4"
@@ -203,10 +204,11 @@ const dashboardItems = [
 export default function DashboardScreen() {
   const user = useUser();
   console.log("eee: app/pages/dashboard.tsx | user from context:", user);
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity
       onPress={() => {
         console.log("Tapped:", item.label);
+        // @ts-ignore
         router.push(`/pages/${item.route}`);
       }}
       style={styles.card}

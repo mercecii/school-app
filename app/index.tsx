@@ -2,11 +2,10 @@ import { Redirect, useSegments } from "expo-router";
 
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
 import { auth, db } from "./firebaseSetup/firebaseSetup";
 
 const Index = () => {
-  const [userRole, setUserRole] = useState<string>("student");
+  const [userRole, setUserRole] = useState<string>("");
   const segments = useSegments();
   const user = auth.currentUser;
 
@@ -21,11 +20,13 @@ const Index = () => {
       console.log("Admin doc exists:", adminsDoc.exists());
       if (adminsDoc.exists()) {
         return "admin";
+      } else if (studentsDoc.exists()) {
+        return "student";
       }
-      return "student";
+      return "";
     } catch (e) {
       console.error("Error fetching user role:", e);
-      return "student";
+      return "";
     }
   };
   console.log("eee: app/index.tsx");
@@ -35,23 +36,37 @@ const Index = () => {
 
   console.log("Segments:", segments);
   const isInsideAuthRouteSegment = segments[0] === "(auth)";
+  getRoleAsync(user?.uid || "").then((role) => {
+    console.log("Fetched user role:", role);
+    setUserRole(role);
+  });
 
+  console.log("Current user:", user);
+  console.log("User role state:", userRole);
   // If not logged in and NOT already on login → redirect to login
   if (!user && !isInsideAuthRouteSegment) {
     console.log("User not logged in, redirecting to login page.");
     return <Redirect href="/(auth)/login" />;
   }
+  if (user && userRole === "admin") {
+    console.log("User is admin, redirecting to admin page.");
+    return <Redirect href="/admin" />;
+  }
+  if (user && userRole === "student") {
+    console.log("redirecting from app/index.tsx");
+    return <Redirect href="/pages/dashboard" />;
+  }
 
   // If logged in and currently in auth → redirect to pages
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "red",
-  },
-});
+// const _styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     backgroundColor: "red",
+//   },
+// });
 
 export default Index;
