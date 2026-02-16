@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { useSelector } from "react-redux";
-import { auth, db } from "../firebaseSetup/firebaseSetup";
+import { auth, db } from "../../firebaseSetup/firebaseSetup";
 import { AppState } from "../store/store";
 
 export default function AdminNotifications() {

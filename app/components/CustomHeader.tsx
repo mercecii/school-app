@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import { useSelector } from "react-redux";
+import { auth } from "../../firebaseSetup/firebaseSetup";
 import { AppState } from "../store/store";
-import { auth } from "./../firebaseSetup/firebaseSetup";
 
 const CustomHeader = () => {
   console.log("CustomHeader rendered | auth = ", auth);

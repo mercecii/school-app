@@ -1,8 +1,8 @@
 import { Redirect, useSegments } from "expo-router";
 
-import { doc, getDoc } from "firebase/firestore";
+import { getRoleAsync } from "@/utils/getRoleAsync";
 import React, { useEffect, useState } from "react";
-import { auth, db } from "./firebaseSetup/firebaseSetup";
+import { auth } from "../firebaseSetup/firebaseSetup";
 
 const Index = () => {
   const [userRole, setUserRole] = useState<string>("");
@@ -10,25 +10,7 @@ const Index = () => {
   const user = auth.currentUser;
 
   console.log("eee: app/index.tsx");
-  const getRoleAsync = async (uid: string) => {
-    try {
-      console.log("getRoleAsync called with uid:", uid);
-      const studentsDoc = await getDoc(doc(db, "students", uid));
-      const adminsDoc = await getDoc(doc(db, "admins", uid));
-      console.log({ studentsDoc, adminsDoc });
-      // return doc.data()?.role || "user";
-      console.log("Admin doc exists:", adminsDoc.exists());
-      if (adminsDoc.exists()) {
-        return "admin";
-      } else if (studentsDoc.exists()) {
-        return "student";
-      }
-      return "";
-    } catch (e) {
-      console.error("Error fetching user role:", e);
-      return "";
-    }
-  };
+
   console.log("eee: app/index.tsx");
   useEffect(() => {
     console.log("Firebase Auth:", auth);

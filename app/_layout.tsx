@@ -4,7 +4,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { Provider, useDispatch, useSelector } from "react-redux";
-import { auth, db } from "./firebaseSetup/firebaseSetup";
+import { auth, db } from "../firebaseSetup/firebaseSetup";
 import { setRole, setUser } from "./store/slices/authSlice";
 import { AppState, store } from "./store/store";
 

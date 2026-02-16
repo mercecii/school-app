@@ -9,8 +9,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 // @ts-ignore
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { UserContext } from "../(context)/UserContext";
+import { auth } from "../../firebaseSetup/firebaseSetup";
 import CustomHeader from "../components/CustomHeader";
-import { auth } from "../firebaseSetup/firebaseSetup";
 
 export default function RootLayoutLevel2() {
   console.log("eee: app/pages/_layout.tsx");
