@@ -22,12 +22,9 @@ const CustomHeader = () => {
       <Text style={{ fontWeight: "600", display: "flex" }}>SSR Juniors</Text>
       <Text style={{ fontWeight: "600", display: "flex" }}>
         {auth?.currentUser?.email || "No user logged in"}
-        {auth?.currentUser ? (
-          <Text style={{ color: "blue", marginLeft: 8 }}>
-            {userInfo?.fullname || "No name available"}
-            {userInfo?.phone || "No name available"}
-          </Text>
-        ) : null}
+      </Text>
+      <Text style={{ fontWeight: "600", display: "flex" }}>
+        {userInfo?.fullName || "No user info"}
       </Text>
     </View>
   );

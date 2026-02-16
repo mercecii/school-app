@@ -39,7 +39,12 @@ function AuthGate() {
       console.log("Admin doc:", adminDoc);
       if (adminDoc.exists()) {
         dispatch(setRole("admin"));
-        dispatch(setUser(adminDoc.data()));
+        const temp = {
+          ...adminDoc.data(),
+          updatedAt: adminDoc.data().updatedAt?.toDate().toISOString(),
+          createdAt: adminDoc.data().createdAt?.toDate().toISOString(),
+        };
+        dispatch(setUser(temp));
         setLoading(false);
         return;
       }
@@ -48,7 +53,13 @@ function AuthGate() {
       console.log("Student doc:", studentDoc);
       if (studentDoc.exists()) {
         dispatch(setRole("student"));
-        dispatch(setUser(studentDoc.data()));
+        const temp = {
+          ...studentDoc.data(),
+          updatedAt: studentDoc.data().updatedAt?.toDate().toISOString(),
+          createdAt: studentDoc.data().createdAt?.toDate().toISOString(),
+        };
+        dispatch(setUser(temp));
+
         setLoading(false);
         return;
       }

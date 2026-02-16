@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../(context)/UserContext";
 
 const dashboardItems = [
   {
@@ -71,12 +71,7 @@ const dashboardItems = [
     route: "circular",
     label: "CIRCULAR",
     icon: (
-      <MaterialCommunityIcons
-        // @ts-ignore
-        name="file-document-box-multiple"
-        size={48}
-        color="#00bcd4"
-      />
+      <MaterialCommunityIcons name="bulletin-board" size={48} color="#00bcd4" />
     ),
   },
   {
