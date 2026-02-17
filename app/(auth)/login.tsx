@@ -1,6 +1,9 @@
 import { getRoleAsync } from "@/utils/getRoleAsync";
+import * as Device from "expo-device";
+import * as ExpoNotifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -11,7 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { auth } from "../../firebaseSetup/firebaseSetup";
+import { auth, db } from "../../firebaseSetup/firebaseSetup";
 
 export default function Login() {
   console.log("eee: app/(auth)/login.tsx");
@@ -20,6 +23,37 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
+  const registerForPushNotificationsAsync = async (uid: string) => {
+    if (!Device.isDevice) {
+      console.log("Push notifications require a physical device");
+      return;
+    }
+
+    const { status: existingStatus } =
+      await ExpoNotifications.getPermissionsAsync();
+
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== "granted") {
+      const { status } = await ExpoNotifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== "granted") {
+      console.log("Push permission not granted");
+      return;
+    }
+
+    const token = (await ExpoNotifications.getExpoPushTokenAsync()).data;
+
+    console.log("Expo Push Token:", token);
+
+    // Save token to Firestore under student document
+    await updateDoc(doc(db, "students", uid), {
+      expoPushToken: token,
+    });
+  };
 
   const handleLogin = async () => {
     setError("");
@@ -30,6 +64,7 @@ export default function Login() {
         const email = temp.user.email;
         console.log("Logged in user email:", email);
         const role = await getRoleAsync(temp.user.uid);
+        await registerForPushNotificationsAsync(temp.user.uid);
         console.log("User role:", role);
         if (role === "admin") {
           router.replace("/admin");
