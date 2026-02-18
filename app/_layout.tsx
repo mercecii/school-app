@@ -4,7 +4,7 @@ import {
 } from "expo-notifications";
 import { Redirect, Slot, useRouter, useSegments } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { Provider, useDispatch, useSelector } from "react-redux";
@@ -96,9 +96,16 @@ function AuthGate() {
     return () => subscription.remove();
   }, [loading]);
 
-  const handleNotification = (response: any) => {
+  const handleNotification = async (response: any) => {
     const data = response.notification.request.content.data;
+    console.log("handleNotofication: response = ", response);
+    const id = data?.notificationId;
 
+    if (id && auth.currentUser) {
+      await updateDoc(doc(db, "notifications", id), {
+        readBy: arrayUnion(auth.currentUser.uid),
+      });
+    }
     // Delay navigation until after layout is fully mounted
     requestAnimationFrame(() => {
       if (data?.screen === "notifications") {

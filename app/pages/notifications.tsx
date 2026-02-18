@@ -1,4 +1,6 @@
+import { getAuth } from "firebase/auth";
 import {
+  arrayUnion,
   collection,
   doc,
   onSnapshot,
@@ -18,6 +20,8 @@ import { db } from "../../firebaseSetup/firebaseSetup";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState<any[]>([]);
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
 
   useEffect(() => {
     const q = query(
@@ -38,37 +42,56 @@ const Notifications = () => {
     return unsubscribe;
   }, []);
 
+  const unreadNotifications = notifications.filter(
+    (n) => !n.readBy?.includes(currentUser?.uid),
+  );
+
+  const readNotifications = notifications.filter((n) =>
+    n.readBy?.includes(currentUser?.uid),
+  );
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Notifications</Text>
 
-      {notifications.length === 0 && (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No notifications yet.</Text>
-        </View>
+      {/* UNREAD SECTION */}
+      <Text style={styles.sectionTitle}>Unread</Text>
+
+      {unreadNotifications.length === 0 && (
+        <Text style={styles.emptyText}>No unread notifications.</Text>
       )}
 
-      {notifications.map((n) => (
-        <View
-          key={n.id}
-          style={[styles.card, !n.readReceipt && styles.unreadCard]}
-        >
+      {unreadNotifications.map((n) => (
+        <View key={n.id} style={[styles.card, styles.unreadCard]}>
           <Text style={styles.title}>{n.title}</Text>
           <Text style={styles.message}>{n.message}</Text>
 
-          {!n.readReceipt && (
-            <TouchableOpacity
-              style={styles.markButton}
-              onPress={async () => {
-                await updateDoc(doc(db, "notifications", n.id), {
-                  readReceipt: true,
-                  readAt: new Date(),
-                });
-              }}
-            >
-              <Text style={styles.markButtonText}>Mark as Read</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={styles.markButton}
+            onPress={async () => {
+              if (!currentUser) return;
+
+              await updateDoc(doc(db, "notifications", n.id), {
+                readBy: arrayUnion(currentUser.uid),
+              });
+            }}
+          >
+            <Text style={styles.markButtonText}>Mark as Read</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+
+      {/* READ SECTION */}
+      <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Read</Text>
+
+      {readNotifications.length === 0 && (
+        <Text style={styles.emptyText}>No read notifications yet.</Text>
+      )}
+
+      {readNotifications.map((n) => (
+        <View key={n.id} style={styles.card}>
+          <Text style={styles.title}>{n.title}</Text>
+          <Text style={styles.message}>{n.message}</Text>
         </View>
       ))}
     </ScrollView>
@@ -136,5 +159,11 @@ const styles = StyleSheet.create({
   emptyText: {
     color: "#6b7280",
     fontSize: 14,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 8,
+    color: "#374151",
   },
 });
