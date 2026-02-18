@@ -1,27 +1,36 @@
 import * as Device from "expo-device";
-import * as Notifications from "expo-notifications";
+import * as ExpoNotifications from "expo-notifications";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../firebaseSetup/firebaseSetup";
 
-export async function registerForPushNotificationsAsync() {
+export const registerForPushNotificationsAsync = async (uid: string) => {
   if (!Device.isDevice) {
-    alert("Use a physical device");
+    console.log("Push notifications require a physical device");
     return;
   }
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  const { status: existingStatus } =
+    await ExpoNotifications.getPermissionsAsync();
 
   let finalStatus = existingStatus;
 
   if (existingStatus !== "granted") {
-    const { status } = await Notifications.requestPermissionsAsync();
+    const { status } = await ExpoNotifications.requestPermissionsAsync();
     finalStatus = status;
   }
 
   if (finalStatus !== "granted") {
-    alert("Permission not granted");
+    console.log("Push permission not granted");
     return;
   }
 
-  const token = (await Notifications.getExpoPushTokenAsync()).data;
+  const token = (await ExpoNotifications.getExpoPushTokenAsync()).data;
 
+  console.log("Expo Push Token:", token);
+
+  // Save token to Firestore under student document
+  await updateDoc(doc(db, "students", uid), {
+    expoPushToken: token,
+  });
   return token;
-}
+};

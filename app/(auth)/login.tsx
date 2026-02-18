@@ -1,6 +1,5 @@
 import { getRoleAsync } from "@/utils/getRoleAsync";
-import * as Device from "expo-device";
-import * as ExpoNotifications from "expo-notifications";
+import { registerForPushNotificationsAsync } from "@/utils/utils";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
@@ -24,51 +23,34 @@ export default function Login() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const registerForPushNotificationsAsync = async (uid: string) => {
-    if (!Device.isDevice) {
-      console.log("Push notifications require a physical device");
-      return;
-    }
-
-    const { status: existingStatus } =
-      await ExpoNotifications.getPermissionsAsync();
-
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== "granted") {
-      const { status } = await ExpoNotifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    if (finalStatus !== "granted") {
-      console.log("Push permission not granted");
-      return;
-    }
-
-    const token = (await ExpoNotifications.getExpoPushTokenAsync()).data;
-
-    console.log("Expo Push Token:", token);
-
-    // Save token to Firestore under student document
-    await updateDoc(doc(db, "students", uid), {
-      expoPushToken: token,
-    });
-  };
-
   const handleLogin = async () => {
     setError("");
     try {
-      const temp = await signInWithEmailAndPassword(auth, email, password);
-      console.log("Login successful:", temp.user.email);
-      if (temp.user.email) {
-        const email = temp.user.email;
+      const userCredentials = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      console.log("Login successful:", userCredentials.user.email);
+      if (userCredentials.user.email) {
+        const email = userCredentials.user.email;
         console.log("Logged in user email:", email);
-        const role = await getRoleAsync(temp.user.uid);
-        await registerForPushNotificationsAsync(temp.user.uid);
+        const role = await getRoleAsync(userCredentials.user.uid);
+        await registerForPushNotificationsAsync(userCredentials.user.uid);
         console.log("User role:", role);
         if (role === "admin") {
           router.replace("/admin");
         } else {
+          const pushToken = await registerForPushNotificationsAsync(
+            userCredentials.user.uid,
+          );
+
+          if (pushToken) {
+            console.log("Updating Firestore with push token:", pushToken);
+            await updateDoc(doc(db, "students", userCredentials.user.uid), {
+              pushToken,
+            });
+          }
           router.replace("/pages/dashboard");
         }
       }
