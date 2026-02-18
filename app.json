@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "SchoolApp",
-    "slug": "SchoolApp",
+    "name": "school-app",
+    "slug": "school-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "schoolapp",
+    "scheme": "school-app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

@@ -84,7 +84,7 @@ export default function Login() {
     >
       <View style={styles.card}>
         <Text style={styles.title}>Welcome Back!</Text>
-        <Text style={styles.subtitle}>Login to your SchoolApp account</Text>
+        <Text style={styles.subtitle}>Login to your school-app account</Text>
         <TextInput
           style={styles.input}
           placeholder="Email"
