@@ -26,6 +26,15 @@ export const registerForPushNotificationsAsync = async (uid: string) => {
   try {
     const token = (await ExpoNotifications.getExpoPushTokenAsync()).data;
     console.log("Expo Push Token:", token);
+    ExpoNotifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
     await updateDoc(doc(db, "students", uid), {
       expoPushToken: token,
     });
