@@ -1,5 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+// @ts-ignore
+import { getReactNativePersistence, initializeAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -14,7 +16,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // ✅ Proper React Native auth with persistence
-export const auth = getAuth(app);
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
 // Auth emulator removed for production
 // connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
 

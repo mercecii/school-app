@@ -1,4 +1,8 @@
-import { Redirect, Slot, useSegments } from "expo-router";
+import {
+  addNotificationResponseReceivedListener,
+  getLastNotificationResponse,
+} from "expo-notifications";
+import { Redirect, Slot, useRouter, useSegments } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -22,6 +26,7 @@ function AuthGate() {
   const { userInfo, role } = useSelector((state: AppState) => state.auth);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
@@ -33,6 +38,7 @@ function AuthGate() {
         return;
       }
 
+      // SETTING UP USER
       const uid = u.uid;
 
       const adminDoc = await getDoc(doc(db, "admins", uid));
@@ -48,7 +54,8 @@ function AuthGate() {
         setLoading(false);
         return;
       }
-
+      // USER SET
+      // SETTING UP USER'S COMPLETE PROFILE IN LOCAL REDUX
       const studentDoc = await getDoc(doc(db, "students", uid));
       console.log("Student doc:", studentDoc);
       if (studentDoc.exists()) {
@@ -59,16 +66,46 @@ function AuthGate() {
           createdAt: studentDoc.data().createdAt?.toDate().toISOString(),
         };
         dispatch(setUser(temp));
-
         setLoading(false);
         return;
       }
+      // DEFAULT HANDLING FOR ADMIN
       dispatch(setUser(u));
       setLoading(false);
     });
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (loading) return; // wait until auth + layout is ready
+
+    const subscription = addNotificationResponseReceivedListener((response) => {
+      handleNotification(response);
+    });
+
+    const checkInitial = async () => {
+      const response = await getLastNotificationResponse();
+      if (response) {
+        handleNotification(response);
+      }
+    };
+
+    checkInitial();
+
+    return () => subscription.remove();
+  }, [loading]);
+
+  const handleNotification = (response: any) => {
+    const data = response.notification.request.content.data;
+
+    // Delay navigation until after layout is fully mounted
+    requestAnimationFrame(() => {
+      if (data?.screen === "notifications") {
+        router.replace("/pages/notifications");
+      }
+    });
+  };
 
   if (loading) {
     return (
