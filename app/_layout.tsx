@@ -1,16 +1,30 @@
+import { AdminDoc, StudentDoc } from "@/firebaseSetup/fireBase.types";
 import {
   addNotificationResponseReceivedListener,
-  getLastNotificationResponse,
+  getLastNotificationResponseAsync,
 } from "expo-notifications";
 import { Redirect, Slot, useRouter, useSegments } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { auth, db } from "../firebaseSetup/firebaseSetup";
 import { setRole, setUser } from "./store/slices/authSlice";
 import { AppState, store } from "./store/store";
+
+/**
+ * Generic Firestore fetch helper
+ */
+async function getTypedDoc<T>(
+  collectionName: string,
+  id: string,
+): Promise<T | null> {
+  const snap = await getDoc(doc(db, collectionName, id));
+  if (!snap.exists()) return null;
+
+  return snap.data() as T;
+}
 
 export default function RootLayout() {
   console.log("RootLayout rendered");
@@ -41,37 +55,38 @@ function AuthGate() {
       // SETTING UP USER
       const uid = u.uid;
 
-      const adminDoc = await getDoc(doc(db, "admins", uid));
-      console.log("Admin doc:", adminDoc);
-      if (adminDoc.exists()) {
+      const adminData = await getTypedDoc<AdminDoc>("admins", uid);
+      console.log("Admin data:", adminData);
+
+      if (adminData) {
         dispatch(setRole("admin"));
-        const temp = {
-          ...adminDoc.data(),
-          updatedAt: adminDoc.data().updatedAt?.toDate().toISOString(),
-          createdAt: adminDoc.data().createdAt?.toDate().toISOString(),
-        };
-        dispatch(setUser(temp));
+        dispatch(
+          setUser({
+            ...adminData,
+            updatedAt: adminData.updatedAt.toString(),
+            createdAt: adminData.updatedAt.toString(),
+          }),
+        );
         setLoading(false);
         return;
       }
       // USER SET
       // SETTING UP USER'S COMPLETE PROFILE IN LOCAL REDUX
-      const studentDoc = await getDoc(doc(db, "students", uid));
-      console.log("Student doc:", studentDoc);
-      if (studentDoc.exists()) {
+      const studentData = await getTypedDoc<StudentDoc>("students", uid);
+      console.log("Student data:", studentData);
+
+      if (studentData) {
         dispatch(setRole("student"));
-        const temp = {
-          ...studentDoc.data(),
-          updatedAt: studentDoc.data().updatedAt?.toDate().toISOString(),
-          createdAt: studentDoc.data().createdAt?.toDate().toISOString(),
-        };
-        dispatch(setUser(temp));
+        dispatch(
+          setUser({
+            ...studentData,
+            updatedAt: studentData.updatedAt.toString(),
+            createdAt: studentData.updatedAt.toString(),
+          }),
+        );
         setLoading(false);
         return;
       }
-      // DEFAULT HANDLING FOR ADMIN
-      dispatch(setUser(u));
-      setLoading(false);
     });
 
     return unsubscribe;
@@ -80,12 +95,17 @@ function AuthGate() {
   useEffect(() => {
     if (loading) return; // wait until auth + layout is ready
 
+    // Web does not support getLastNotificationResponseAsync
+    if (Platform.OS === "web") {
+      return;
+    }
+
     const subscription = addNotificationResponseReceivedListener((response) => {
       handleNotification(response);
     });
 
     const checkInitial = async () => {
-      const response = await getLastNotificationResponse();
+      const response = await getLastNotificationResponseAsync();
       if (response) {
         handleNotification(response);
       }

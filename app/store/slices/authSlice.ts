@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AdminWithStringDate, StudentwithStringDate } from "./auth.type";
 
 type UserRole = "admin" | "student" | null;
 
 interface AuthState {
-  userInfo: any | null;
+  userInfo: AdminWithStringDate | StudentwithStringDate | null;
   role: UserRole;
   loading: boolean;
 }
@@ -18,7 +19,7 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setUser(state, action: PayloadAction<any>) {
+    setUser(state, action: PayloadAction<Admin | Student | null>) {
       state.userInfo = action.payload;
     },
     setRole(state, action: PayloadAction<UserRole>) {

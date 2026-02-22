@@ -1,7 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { initializeApp } from "firebase/app";
-// @ts-ignore
-import { getReactNativePersistence, initializeAuth } from "firebase/auth";
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -13,16 +11,30 @@ const firebaseConfig = {
   appId: "1:198371863429:web:bd6cb1d9ced76fb8f472ec",
 };
 
-const app = initializeApp(firebaseConfig);
+// const app = initializeApp(firebaseConfig);
 
-// ✅ Proper React Native auth with persistence
-export const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
-// Auth emulator removed for production
-// connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+// let auth;
+
+// if (Platform.OS === "web") {
+//   // Web uses default browser persistence automatically
+//   auth = getAuth(app);
+// } else {
+//   // React Native needs explicit AsyncStorage persistence
+//   // ✅ Proper React Native auth with persistence
+//   const { getReactNativePersistence } = require("firebase/auth/react-native");
+//   const persistence = getReactNativePersistence(AsyncStorage);
+//   console.log("persistence = ", persistence);
+
+//   auth = initializeAuth(app, {
+//     persistence,
+//   });
+//   // Auth emulator removed for production
+// }
+
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Firestore
 export const db = getFirestore(app);
+export const auth = getAuth(app);
 
 export default app;
