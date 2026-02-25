@@ -35,7 +35,7 @@ const Index = () => {
   }
   if (user && userRole === "student") {
     console.log("redirecting from app/index.tsx");
-    return <Redirect href="/pages/dashboard" />;
+    return <Redirect href="/pages" />;
   }
 };
 

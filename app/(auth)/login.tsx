@@ -51,7 +51,7 @@ export default function Login() {
               pushToken,
             });
           }
-          router.replace("/pages/dashboard");
+          router.replace("/pages");
         }
       }
     } catch (err) {

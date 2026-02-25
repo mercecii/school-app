@@ -154,7 +154,7 @@ function AuthGate() {
 
   if (userInfo && segments[0] === "(auth)" && role === "student") {
     console.log("Redirecting to student dashboard");
-    return <Redirect href="/pages/dashboard" />;
+    return <Redirect href="/pages" />;
   }
 
   return <Slot />;

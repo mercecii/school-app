@@ -1,260 +1,115 @@
-import {
-  Entypo,
-  FontAwesome5,
-  MaterialCommunityIcons,
-  MaterialIcons,
-} from "@expo/vector-icons";
-import { router } from "expo-router";
 import React from "react";
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useUser } from "../(context)/UserContext";
-
-const dashboardItems = [
-  {
-    key: "dashboard",
-    route: "dashboard",
-    label: "DASHBOARD",
-    icon: (
-      <MaterialCommunityIcons name="speedometer" size={48} color="#ff9800" />
-    ),
-  },
-  {
-    key: "calendar",
-    route: "calendar",
-    label: "CALENDAR",
-    icon: <MaterialIcons name="calendar-today" size={48} color="#2196f3" />,
-  },
-  {
-    key: "attendance",
-    route: "attendance",
-    label: "ATTENDANCE",
-    icon: <FontAwesome5 name="user-check" size={48} color="#4caf50" />,
-  },
-  {
-    key: "homework",
-    route: "homework",
-    label: "HOMEWORK",
-    icon: <Entypo name="book" size={48} color="#e91e63" />,
-  },
-  {
-    key: "notes",
-    route: "notes",
-    label: "ACADEMIC NOTES",
-    icon: <MaterialCommunityIcons name="notebook" size={48} color="#ffc107" />,
-  },
-  {
-    key: "video",
-    route: "video",
-    label: "ACADEMIC VIDEO",
-    icon: <Entypo name="video" size={48} color="#f44336" />,
-  },
-  {
-    key: "syllabus",
-    route: "syllabus",
-    label: "SYLLABUS",
-    icon: (
-      <MaterialCommunityIcons
-        name="file-document-edit"
-        size={48}
-        color="#3f51b5"
-      />
-    ),
-  },
-  {
-    key: "circular",
-    route: "circular",
-    label: "CIRCULAR",
-    icon: (
-      <MaterialCommunityIcons name="bulletin-board" size={48} color="#00bcd4" />
-    ),
-  },
-  {
-    key: "previous-year-question-paper",
-    route: "previous-year-question-paper",
-    label: "PREVIOUS YEAR QUESTION PAPER",
-    icon: (
-      <MaterialCommunityIcons
-        name="file-document-outline"
-        size={48}
-        color="#009688"
-      />
-    ),
-  },
-  {
-    key: "notifications",
-    route: "notifications",
-    label: "NOTIFICATIONS",
-    icon: (
-      <MaterialCommunityIcons name="bell-outline" size={48} color="#9c27b0" />
-    ),
-  },
-  {
-    key: "profile",
-    route: "profile",
-    label: "PROFILE",
-    icon: (
-      <MaterialCommunityIcons
-        name="account-outline"
-        size={48}
-        color="#607d8b"
-      />
-    ),
-  },
-  {
-    key: "news-gallery",
-    route: "news-gallery",
-    label: "NEWS & GALLERY",
-    icon: (
-      <MaterialCommunityIcons
-        name="image-multiple-outline"
-        size={48}
-        color="#795548"
-      />
-    ),
-  },
-  {
-    key: "events",
-    route: "events",
-    label: "EVENTS",
-    icon: (
-      <MaterialCommunityIcons name="calendar-star" size={48} color="#673ab7" />
-    ),
-  },
-  {
-    key: "fees",
-    route: "fees",
-    label: "FEES",
-    icon: (
-      <MaterialCommunityIcons name="cash-multiple" size={48} color="#8bc34a" />
-    ),
-  },
-  {
-    key: "download",
-    route: "download",
-    label: "DOWNLOAD",
-    icon: (
-      <MaterialCommunityIcons
-        name="download-outline"
-        size={48}
-        color="#cddc39"
-      />
-    ),
-  },
-  {
-    key: "daily-timetable",
-    route: "daily-timetable",
-    label: "DAILY TIMETABLE",
-    icon: (
-      <MaterialCommunityIcons name="clock-outline" size={48} color="#e91e63" />
-    ),
-  },
-  {
-    key: "calendar-remove",
-    route: "calendar-remove",
-    label: "CALENDAR REMOVE",
-    icon: (
-      <MaterialCommunityIcons
-        name="calendar-remove-outline"
-        size={48}
-        color="#9e9e9e"
-      />
-    ),
-  },
-  {
-    key: "events",
-    route: "events",
-    label: "EVENTS",
-    icon: (
-      <MaterialCommunityIcons name="calendar-star" size={48} color="#673ab7" />
-    ),
-  },
-  {
-    key: "fees",
-    route: "fees",
-    label: "FEES",
-    icon: (
-      <MaterialCommunityIcons name="cash-multiple" size={48} color="#8bc34a" />
-    ),
-  },
-  {
-    key: "syllabus",
-    route: "syllabus",
-    label: "SYLLABUS",
-    icon: (
-      <MaterialCommunityIcons
-        name="file-document-edit"
-        size={48}
-        color="#3f51b5"
-      />
-    ),
-  },
-];
+import { StyleSheet, Text, View } from "react-native";
+import { StudentwithStringDate } from "../store/slices/auth.type";
+import { useAppSelector } from "../store/store";
 
 export default function DashboardScreen() {
-  const user = useUser();
-  console.log("eee: app/pages/dashboard.tsx | user from context:", user);
-  const renderItem = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      onPress={() => {
-        console.log("Tapped:", item.label);
-        // @ts-ignore
-        router.push(`/pages/${item.route}`);
-      }}
-      style={styles.card}
-    >
-      {item.icon}
-      <Text style={styles.label}>{item.label}</Text>
-    </TouchableOpacity>
-  );
-  console.log("DashboardScreen rendered");
+  const user: StudentwithStringDate = useAppSelector(
+    (state) => state.auth.userInfo,
+  ) as StudentwithStringDate;
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={dashboardItems}
-        renderItem={renderItem}
-        numColumns={2}
-        keyExtractor={(item) => item.key}
-        contentContainerStyle={styles.grid}
-      />
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>DASHBOARD</Text>
+        <Text style={styles.headerSubtitle}>
+          {user?.fullname || "Student Name"} - Class {user?.class || ""}
+        </Text>
+      </View>
+
+      <View style={styles.profileCard}>
+        <View style={styles.avatarCircle}>
+          <Text style={styles.avatarText}>
+            {user?.fullname ? user.fullname.charAt(0) : "S"}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.infoSection}>
+        <InfoRow label="Admission No" value={user?.rollNumber || "-"} />
+        <InfoRow label="Student Type" value="Regular" />
+        <InfoRow label="Scholar No" value="-" />
+        <InfoRow label="Child ID" value="-" />
+        <InfoRow label="Roll No" value={user?.rollNumber || "-"} />
+        <InfoRow label="Aadhar Card" value="-" />
+        <InfoRow label="Date of Birth" value="-" />
+        <InfoRow label="Father's Name" value={user?.parentName || "-"} />
+        <InfoRow label="Father's Mobile No." value={user?.parentPhone || "-"} />
+        <InfoRow label="Mother's Name" value="-" />
+        <InfoRow label="Mother's Mobile No." value="-" />
+      </View>
     </View>
   );
 }
+
+const InfoRow = ({ label, value }: { label: string; value: string }) => (
+  <View style={styles.row}>
+    <Text style={styles.rowLabel}>{label}</Text>
+    <Text style={styles.rowValue}>{value}</Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f6fa",
-    paddingTop: 16,
   },
-  grid: {
-    paddingBottom: 16,
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
+  header: {
+    backgroundColor: "#4a90e2",
+    paddingVertical: 20,
     alignItems: "center",
-    justifyContent: "center",
-    margin: 12,
-    flexBasis: "42%",
-    minHeight: 140,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
-  label: {
-    marginTop: 12,
-    fontSize: 16,
+  headerTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  headerSubtitle: {
+    color: "#fff",
+    marginTop: 4,
+    fontSize: 14,
+  },
+  profileCard: {
+    alignItems: "center",
+    marginTop: -40,
+    marginBottom: 20,
+  },
+  avatarCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#26a69a",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 4,
+  },
+  avatarText: {
+    fontSize: 48,
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  infoSection: {
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    borderRadius: 12,
+    paddingVertical: 8,
+    elevation: 2,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  rowLabel: {
+    fontSize: 14,
+    color: "#555",
+  },
+  rowValue: {
+    fontSize: 14,
     fontWeight: "600",
     color: "#333",
-    textAlign: "center",
   },
 });

@@ -75,6 +75,15 @@ export default function RootLayoutLevel2() {
           }}
         >
           <Drawer.Screen
+            name="index"
+            options={{
+              title: "Home",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="home" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
             name="dashboard"
             options={{
               title: "Dashboard",
