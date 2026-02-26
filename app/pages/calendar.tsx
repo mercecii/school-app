@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Calendar as RNCalendar } from "react-native-calendars";
-import { useUser } from "../(context)/UserContext";
+import { Calendar } from "react-native-calendars";
+import { StudentwithStringDate } from "../store/slices/auth.type";
+import { useAppSelector } from "../store/store";
 
 export default function CalendarScreen() {
-  const user = useUser();
+  const user: StudentwithStringDate = useAppSelector(
+    (state) => state.auth.userInfo,
+  ) as StudentwithStringDate;
+
   const [selectedDate, setSelectedDate] = useState<string>("");
 
   return (
@@ -13,12 +17,12 @@ export default function CalendarScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>CALENDAR</Text>
         <Text style={styles.headerSubtitle}>
-          {user?.fullName || "Student Name"} CLASS-{user?.class || ""}
+          {user?.fullname || "Student Name"} CLASS-{user?.class || ""}
         </Text>
       </View>
 
       {/* Calendar Component */}
-      <RNCalendar
+      <Calendar
         onDayPress={(day) => {
           setSelectedDate(day.dateString);
         }}

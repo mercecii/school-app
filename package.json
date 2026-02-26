@@ -2,6 +2,13 @@
   "name": "school-app",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "comments": {
+    "npx expo run:android": "Turn my Expo project into a real native Android app and install it.",
+    "npx expo start --android": "Run my JS inside Expo Go.",
+    "cd android && ./gradlew assembleRelease": "Generate a release APK for Android.",
+    "npx eas build -p android --profile preview": "Generate a release APK for Android using EAS Build.",
+    "npx eas build -p ios --profile preview": "Generate a release IPA for iOS using EAS Build."
+  },
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -9,7 +16,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "export-web": "npx expo export --platform web"
+    "export-web": "npx expo export --platform web",
+    "generate-apk": "eas build -p android --profile preview",
+    "generate-ipa": "eas build -p ios --profile preview"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

@@ -35,7 +35,7 @@ export type NotificationDoc = {
 export type StudentDoc = {
   class: string;
   createdAt: Timestamp; // or Date
-  expoPushToken: string;
+  expoPushTokens: string[]; // array of push tokens
   fullname: string;
   gender: string; // or 'M' | 'F'
   isActive: boolean;
