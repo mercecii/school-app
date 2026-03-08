@@ -1,4 +1,10 @@
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { NotificationDoc } from "@/firebaseSetup/fireBase.types";
+import {
+  addDoc,
+  collection,
+  CollectionReference,
+  serverTimestamp,
+} from "firebase/firestore";
 import { useState } from "react";
 import {
   ScrollView,
@@ -9,7 +15,7 @@ import {
   View,
 } from "react-native";
 import { useSelector } from "react-redux";
-import { auth, db } from "../../firebaseSetup/firebaseSetup";
+import { auth, firestore } from "../../firebaseSetup/firebaseSetup";
 import { AdminWithStringDate } from "../store/slices/auth.type";
 import { AppState } from "../store/store";
 
@@ -23,14 +29,24 @@ export default function AdminNotifications() {
   const [message, setMessage] = useState("");
 
   const handleSend = async () => {
-    await addDoc(collection(db, "notifications"), {
-      title,
-      message,
-      targetType: "ALL",
-      createdBy: auth.currentUser?.uid,
-      createdAt: serverTimestamp(),
-      isActive: true,
-    });
+    await addDoc(
+      collection(firestore, "notifications") as CollectionReference<
+        NotificationDoc,
+        NotificationDoc
+      >,
+      {
+        title,
+        message,
+        targetType: "ALL",
+        createdBy: auth.currentUser?.uid as string,
+        createdAt: serverTimestamp(),
+        isActive: true,
+        readReceipt: false,
+        readAt: null,
+        readBy: [],
+        targetValue: "",
+      },
+    );
   };
 
   console.log("eee: app/admin/index.tsx | user:", userInfo);

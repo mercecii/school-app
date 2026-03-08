@@ -75,6 +75,14 @@ const dashboardItems = [
     ),
   },
   {
+    key: "applyLeave",
+    route: "apply-leave",
+    label: "APPLY LEAVE",
+    icon: (
+      <MaterialCommunityIcons name="account-tie" size={48} color="#009688" />
+    ),
+  },
+  {
     key: "previous-year-question-paper",
     route: "previous-year-question-paper",
     label: "PREVIOUS YEAR QUESTION PAPER",
@@ -203,8 +211,7 @@ export default function StudentHomePage() {
     <TouchableOpacity
       onPress={() => {
         console.log("Tapped:", item.label);
-        // @ts-ignore
-        router.push(`/pages/${item.route}`);
+        router.push(`./pages/${item.route}`);
       }}
       style={styles.card}
     >

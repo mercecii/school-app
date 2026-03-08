@@ -9,7 +9,7 @@ import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Platform, View } from "react-native";
 import { Provider, useDispatch, useSelector } from "react-redux";
-import { auth, db } from "../firebaseSetup/firebaseSetup";
+import { auth, firestore } from "../firebaseSetup/firebaseSetup";
 import { setRole, setUser } from "./store/slices/authSlice";
 import { AppState, store } from "./store/store";
 
@@ -20,7 +20,7 @@ async function getTypedDoc<T>(
   collectionName: string,
   id: string,
 ): Promise<T | null> {
-  const snap = await getDoc(doc(db, collectionName, id));
+  const snap = await getDoc(doc(firestore, collectionName, id));
   if (!snap.exists()) return null;
 
   return snap.data() as T;
@@ -122,7 +122,7 @@ function AuthGate() {
     const id = data?.notificationId;
 
     if (id && auth.currentUser) {
-      await updateDoc(doc(db, "notifications", id), {
+      await updateDoc(doc(firestore, "notifications", id), {
         readBy: arrayUnion(auth.currentUser.uid),
       });
     }

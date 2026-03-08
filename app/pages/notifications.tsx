@@ -16,7 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { db } from "../../firebaseSetup/firebaseSetup";
+import { firestore } from "../../firebaseSetup/firebaseSetup";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -25,7 +25,7 @@ const Notifications = () => {
 
   useEffect(() => {
     const q = query(
-      collection(db, "notifications"),
+      collection(firestore, "notifications"),
       orderBy("createdAt", "desc"),
     );
 
@@ -71,7 +71,7 @@ const Notifications = () => {
             onPress={async () => {
               if (!currentUser) return;
 
-              await updateDoc(doc(db, "notifications", n.id), {
+              await updateDoc(doc(firestore, "notifications", n.id), {
                 readBy: arrayUnion(currentUser.uid),
               });
             }}

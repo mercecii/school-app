@@ -2,7 +2,6 @@ import { getRoleAsync } from "@/utils/getRoleAsync";
 import { registerForPushNotificationsAsync } from "@/utils/utils";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -13,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { auth, db } from "../../firebaseSetup/firebaseSetup";
+import { auth } from "../../firebaseSetup/firebaseSetup";
 
 export default function Login() {
   console.log("eee: app/(auth)/login.tsx");
@@ -31,31 +30,24 @@ export default function Login() {
         email,
         password,
       );
+      const { uid } = userCredentials.user;
       console.log("Login successful:", userCredentials.user.email);
       if (userCredentials.user.email) {
         const email = userCredentials.user.email;
         console.log("Logged in user email:", email);
         const role = await getRoleAsync(userCredentials.user.uid);
-        await registerForPushNotificationsAsync(userCredentials.user.uid);
+        // await registerForPushNotificationsAsync(userCredentials.user.uid);
         console.log("User role:", role);
         if (role === "admin") {
           router.replace("/admin");
         } else {
-          const pushToken = await registerForPushNotificationsAsync(
-            userCredentials.user.uid,
-          );
-
-          if (pushToken) {
-            console.log("Updating Firestore with push token:", pushToken);
-            await updateDoc(doc(db, "students", userCredentials.user.uid), {
-              pushToken,
-            });
-          }
+          await registerForPushNotificationsAsync(uid);
           router.replace("/pages");
         }
       }
     } catch (err) {
       setError("Invalid email or password");
+      console.error("Login error:", err);
     }
   };
 

@@ -1,6 +1,6 @@
 import * as ExpoNotifications from "expo-notifications";
 import { arrayUnion, doc, updateDoc } from "firebase/firestore";
-import { db } from "../firebaseSetup/firebaseSetup";
+import { firestore } from "../firebaseSetup/firebaseSetup";
 
 export const registerForPushNotificationsAsync = async (uid: string) => {
   // if (!Device.isDevice) {
@@ -37,7 +37,7 @@ export const registerForPushNotificationsAsync = async (uid: string) => {
     ExpoNotifications.addNotificationResponseReceivedListener((response) => {
       console.log("User tapped notification:", response);
     });
-    await updateDoc(doc(db, "students", uid), {
+    await updateDoc(doc(firestore, "students", uid), {
       expoPushTokens: arrayUnion(token),
     });
     return token;
