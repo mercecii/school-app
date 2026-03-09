@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useUser } from "../(context)/UserContext";
+import { useUser } from "../../context/UserContext";
 
 const dashboardItems = [
   {

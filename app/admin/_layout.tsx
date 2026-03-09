@@ -4,8 +4,8 @@ import { signOut } from "firebase/auth";
 import React, { useState } from "react";
 import { StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { UserContext } from "../(context)/UserContext";
 import CustomHeader from "../../components/CustomHeader";
+import { UserContext } from "../../context/UserContext";
 import { auth } from "../../firebaseSetup/firebaseSetup";
 // @ts-ignore
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";

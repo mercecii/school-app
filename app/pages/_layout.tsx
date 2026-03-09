@@ -4,8 +4,8 @@ import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { UserContext } from "../(context)/UserContext";
 import CustomHeader from "../../components/CustomHeader";
+import { UserContext } from "../../context/UserContext";
 import { auth } from "../../firebaseSetup/firebaseSetup";
 
 export default function RootLayoutLevel2() {
