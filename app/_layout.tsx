@@ -10,8 +10,8 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Platform, View } from "react-native";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { auth, firestore } from "../firebaseSetup/firebaseSetup";
-import { setRole, setUser } from "./store/slices/authSlice";
-import { AppState, store } from "./store/store";
+import { setRole, setUser } from "../store/slices/authSlice";
+import { AppState, store } from "../store/store";
 
 /**
  * Generic Firestore fetch helper

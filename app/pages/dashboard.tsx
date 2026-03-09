@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { StudentwithStringDate } from "../store/slices/auth.type";
-import { useAppSelector } from "../store/store";
+import { StudentwithStringDate } from "../../store/slices/auth.type";
+import { useAppSelector } from "../../store/store";
 
 export default function DashboardScreen() {
   const user: StudentwithStringDate = useAppSelector(

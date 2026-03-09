@@ -1,8 +1,8 @@
-import { StudentwithStringDate } from "@/app/store/slices/auth.type";
+import { StudentwithStringDate } from "@/store/slices/auth.type";
 import { HeaderTitleProps } from "@react-navigation/elements";
 import { StyleSheet, Text, View } from "react-native";
 import { useSelector } from "react-redux";
-import { AppState } from "../app/store/store";
+import { AppState } from "../store/store";
 
 const CustomHeader = (props: HeaderTitleProps) => {
   const studentInfo = useSelector(

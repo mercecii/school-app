@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { StudentwithStringDate } from "../store/slices/auth.type";
-import { useAppSelector } from "../store/store";
+import { StudentwithStringDate } from "../../store/slices/auth.type";
+import { useAppSelector } from "../../store/store";
 
 export default function CalendarScreen() {
   const user: StudentwithStringDate = useAppSelector(
