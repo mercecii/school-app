@@ -1,12 +1,14 @@
+import { StudentwithStringDate } from "@/app/store/slices/auth.type";
+import { HeaderTitleProps } from "@react-navigation/elements";
 import { StyleSheet, Text, View } from "react-native";
 import { useSelector } from "react-redux";
-import { auth } from "../../firebaseSetup/firebaseSetup";
-import { AppState } from "../store/store";
+import { AppState } from "../app/store/store";
 
-const CustomHeader = () => {
-  console.log("CustomHeader rendered | auth = ", auth);
-  const { userInfo } = useSelector((state: AppState) => state.auth);
-  console.log("CustomHeader rendered | auth.currentUser = ", userInfo);
+const CustomHeader = (props: HeaderTitleProps) => {
+  const studentInfo = useSelector(
+    (state: AppState) => state.auth.userInfo,
+  ) as StudentwithStringDate;
+  console.log("CustomHeader rendered | userInfo from store = ", studentInfo);
 
   return (
     <View
@@ -19,12 +21,10 @@ const CustomHeader = () => {
         elevation: 4,
       }}
     >
-      <Text style={{ fontWeight: "600", display: "flex" }}>SSR Juniors</Text>
+      <Text style={{ fontWeight: "600", display: "flex" }}>Page Title</Text>
+      <Text style={{ fontWeight: "600", display: "flex" }}></Text>
       <Text style={{ fontWeight: "600", display: "flex" }}>
-        {auth?.currentUser?.email || "No user logged in"}
-      </Text>
-      <Text style={{ fontWeight: "600", display: "flex" }}>
-        {userInfo?.fullName || "No user info"}
+        {studentInfo.fullname || "No Student info"}
       </Text>
     </View>
   );

@@ -15,7 +15,7 @@ import {
 import { auth } from "../../firebaseSetup/firebaseSetup";
 
 export default function Login() {
-  console.log("eee: app/(auth)/login.tsx");
+  console.log("eee: ./app/(auth)/login.tsx");
 
   const [email, setEmail] = useState("d9572712747@gmail.com");
   const [password, setPassword] = useState("fakePassword");
