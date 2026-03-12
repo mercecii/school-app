@@ -13,18 +13,23 @@ const CustomHeader = (props: HeaderTitleProps) => {
   return (
     <View
       style={{
-        backgroundColor: "#fff",
+        flexGrow: 1,
+        alignSelf: "stretch",
+        backgroundColor: "red",
         paddingHorizontal: 16,
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "space-between",
-        elevation: 4,
+        justifyContent: "center",
       }}
     >
-      <Text style={{ fontWeight: "600", display: "flex" }}>Page Title</Text>
-      <Text style={{ fontWeight: "600", display: "flex" }}></Text>
-      <Text style={{ fontWeight: "600", display: "flex" }}>
-        {studentInfo.fullname || "No Student info"}
+      {/* <Text style={{ fontWeight: "600" }}>Page Title</Text> */}
+
+      <Text style={{ fontWeight: "600" }}>
+        {(studentInfo && studentInfo.fullname) || "No Student info"}
+      </Text>
+      <Text style={{ fontWeight: "600" }}>
+        {" "}
+        {"CLASS  - " + studentInfo.class + studentInfo.section}
       </Text>
     </View>
   );
