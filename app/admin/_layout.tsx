@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import Drawer from "expo-router/drawer";
 import { signOut } from "firebase/auth";
@@ -7,8 +8,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CustomHeader from "../../components/CustomHeader";
 import { UserContext } from "../../context/UserContext";
 import { auth } from "../../firebaseSetup/firebaseSetup";
-// @ts-ignore
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const AdminLayout = () => {
   console.log("eee: app/admin/_layout.tsx");

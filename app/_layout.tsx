@@ -13,6 +13,11 @@ import { auth, firestore } from "../firebaseSetup/firebaseSetup";
 import { setRole, setUser } from "../store/slices/authSlice";
 import { AppState, store } from "../store/store";
 
+// Load fonts for web
+if (Platform.OS === "web") {
+  require("../public/fonts.css");
+}
+
 /**
  * Generic Firestore fetch helper
  */
