@@ -1,61 +1,37 @@
 import { StudentwithStringDate } from "@/store/slices/auth.type";
 import { HeaderTitleProps } from "@react-navigation/elements";
-import { StyleSheet, Text, View } from "react-native";
-import { useSelector } from "react-redux";
-import { AppState } from "../store/store";
+import { Text, View } from "react-native";
+import { AppState, useAppSelector } from "../store/store";
 
 const CustomHeader = (props: HeaderTitleProps) => {
-  const studentInfo = useSelector(
+  const studentInfo = useAppSelector(
     (state: AppState) => state.auth.userInfo,
   ) as StudentwithStringDate;
-  console.log("CustomHeader rendered | userInfo from store = ", studentInfo);
+  const screenTitle = typeof props.children === "string" ? props.children : "";
 
   return (
     <View
       style={{
         flexGrow: 1,
         alignSelf: "stretch",
-        backgroundColor: "red",
-        paddingHorizontal: 16,
+        backgroundColor: "smokewhite",
+        paddingHorizontal: 0,
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
       }}
     >
-      {/* <Text style={{ fontWeight: "600" }}>Page Title</Text> */}
-
-      <Text style={{ fontWeight: "600" }}>
-        {(studentInfo && studentInfo.fullname) || "No Student info"}
-      </Text>
-      <Text style={{ fontWeight: "600" }}>
-        {" "}
-        {"CLASS  - " + studentInfo.class + studentInfo.section}
-      </Text>
+      <Text style={{ fontWeight: "600" }}>{screenTitle}</Text>
+      {studentInfo && (
+        <Text style={{ fontWeight: "600" }}>
+          {(studentInfo.fullname || "No Student info") +
+            " · CLASS - " +
+            (studentInfo.class ?? "") +
+            (studentInfo.section ?? "")}
+        </Text>
+      )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    elevation: 4,
-  },
-  title: {
-    fontWeight: "600",
-    fontSize: 18,
-  },
-  userInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  userName: {
-    color: "blue",
-    marginLeft: 8,
-  },
-});
 
 export default CustomHeader;

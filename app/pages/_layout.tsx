@@ -1,10 +1,10 @@
+import CustomHeader from "@/components/CustomHeader";
 import HeaderRight from "@/components/HeaderRight";
 import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import CustomHeader from "../../components/CustomHeader";
 import { UserContext } from "../../context/UserContext";
 import { auth } from "../../firebaseSetup/firebaseSetup";
 
@@ -29,7 +29,8 @@ export default function RootLayoutLevel2() {
         <Drawer
           screenOptions={{
             headerTitle: CustomHeader,
-            headerRight: HeaderRight,
+            headerRight: () => <HeaderRight canGoBack={false} />,
+            headerTitleAlign: "center",
           }}
         >
           <Drawer.Screen
