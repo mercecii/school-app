@@ -8,6 +8,10 @@
     "scheme": "school-app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "androidStatusBar": {
+      "translucent": false,
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true
     },

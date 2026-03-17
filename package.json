@@ -6,6 +6,7 @@
     "npx expo run:android": "Turn my Expo project into a real native Android app and install it.",
     "npx expo start --android": "Run my JS inside Expo Go.",
     "cd android && ./gradlew assembleRelease": "Generate a release APK for Android.",
+    "cd android && ./gradlew bundleRelease": "Generate a release AAB file for Android. to be uploaded to the Play Store.",
     "npx eas build -p android --profile preview": "Generate a release APK for Android using EAS Build.",
     "npx eas build -p ios --profile preview": "Generate a release IPA for iOS using EAS Build."
   },

@@ -45,3 +45,7 @@ app-example
 
 # firebase ccache
 .firebase
+
+#keystore
+android/app/keystore/*
+*.keystore
