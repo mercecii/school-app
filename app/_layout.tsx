@@ -50,6 +50,9 @@ function AuthGate() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
       console.log("Auth state changed, user:", u);
+
+      if (u === undefined) return;
+
       if (!u) {
         dispatch(setUser(null));
         dispatch(setRole(null));
@@ -59,6 +62,7 @@ function AuthGate() {
 
       // SETTING UP USER
       const uid = u.uid;
+      console.log("Restoring session for UID:", uid);
 
       const adminData = await getTypedDoc<AdminDoc>("admins", uid);
       console.log("Admin data:", adminData);
@@ -92,6 +96,7 @@ function AuthGate() {
         setLoading(false);
         return;
       }
+      setLoading(true);
     });
 
     return unsubscribe;
@@ -147,17 +152,17 @@ function AuthGate() {
     );
   }
 
-  if (!userInfo && segments[0] !== "(auth)") {
+  if (!loading && !userInfo && segments[0] !== "(auth)") {
     console.log("Redirecting to login because user is not authenticated");
     return <Redirect href="/(auth)/login" />;
   }
 
-  if (userInfo && segments[0] === "(auth)" && role === "admin") {
+  if (!loading && userInfo && segments[0] === "(auth)" && role === "admin") {
     console.log("Redirecting to admin dashboard");
     return <Redirect href="/admin" />;
   }
 
-  if (userInfo && segments[0] === "(auth)" && role === "student") {
+  if (!loading && userInfo && segments[0] === "(auth)" && role === "student") {
     console.log("Redirecting to student dashboard");
     return <Redirect href="/pages" />;
   }
