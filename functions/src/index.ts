@@ -98,19 +98,34 @@ export const sendExpoNotification = onDocumentCreated(
       }
     }
 
-    // 2. Collect tokens
+    // 2. Collect tokens (supports mixed old/new formats during migration)
     const tokenMap: Record<string, { studentId: string; deviceId: string }[]> =
       {};
     const tokens: string[] = [];
 
     students.forEach((student) => {
-      (student.expoPushTokens || []).forEach((entry: ExpoPushTokenEntry) => {
-        if (!tokenMap[entry.token]) tokenMap[entry.token] = [];
-        tokenMap[entry.token].push({
-          studentId: student.id,
-          deviceId: entry.deviceId,
-        });
-        tokens.push(entry.token);
+      const entries = Array.isArray(student.expoPushTokens)
+        ? (student.expoPushTokens as any[])
+        : [];
+
+      entries.forEach((entry) => {
+        const token =
+          typeof entry === "string"
+            ? entry
+            : typeof entry?.token === "string"
+              ? entry.token
+              : "";
+
+        if (!token) return;
+
+        const deviceId =
+          typeof entry === "object" && typeof entry?.deviceId === "string"
+            ? entry.deviceId
+            : token;
+
+        if (!tokenMap[token]) tokenMap[token] = [];
+        tokenMap[token].push({ studentId: student.id, deviceId });
+        tokens.push(token);
       });
     });
 
