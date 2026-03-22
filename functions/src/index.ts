@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase-admin/app";
 import {
   DocumentData,
-  FieldValue,
   getFirestore,
   QueryDocumentSnapshot,
 } from "firebase-admin/firestore";
@@ -25,10 +24,17 @@ type NotificationDocument = {
   targetValue: string;
 };
 
+type ExpoPushTokenEntry = {
+  token: string;
+  deviceId: string;
+  platform: "android" | "ios";
+  lastSeenAt: any;
+};
+
 type StudentDocument = {
   id: string;
   class?: string;
-  expoPushTokens?: string[];
+  expoPushTokens?: ExpoPushTokenEntry[];
 };
 
 type ExpoMessage = {
@@ -93,15 +99,21 @@ export const sendExpoNotification = onDocumentCreated(
     }
 
     // 2. Collect tokens
-    const tokenMap: Record<string, string[]> = {};
+    const tokenMap: Record<string, { studentId: string; deviceId: string }[]> =
+      {};
     const tokens: string[] = [];
+
     students.forEach((student) => {
-      (student.expoPushTokens || []).forEach((token: string) => {
-        if (!tokenMap[token]) tokenMap[token] = [];
-        tokenMap[token].push(student.id);
-        tokens.push(token);
+      (student.expoPushTokens || []).forEach((entry: ExpoPushTokenEntry) => {
+        if (!tokenMap[entry.token]) tokenMap[entry.token] = [];
+        tokenMap[entry.token].push({
+          studentId: student.id,
+          deviceId: entry.deviceId,
+        });
+        tokens.push(entry.token);
       });
     });
+
     const uniqueTokens = Array.from(new Set(tokens));
 
     if (uniqueTokens.length === 0) return;
@@ -136,11 +148,33 @@ export const sendExpoNotification = onDocumentCreated(
               ticket.details.error === "DeviceNotRegistered"
             ) {
               const badToken = batch[idx].to;
-              (tokenMap[badToken] || []).forEach((studentId: string) => {
+              const entries = tokenMap[badToken] || [];
+
+              entries.forEach(({ studentId, deviceId }) => {
+                // Get current tokens and filter out the bad device
                 db.collection("students")
                   .doc(studentId)
-                  .update({
-                    expoPushTokens: FieldValue.arrayRemove(badToken),
+                  .get()
+                  .then((doc) => {
+                    if (!doc.exists) return;
+
+                    const data = doc.data();
+                    if (!data) return;
+
+                    const currentTokens: ExpoPushTokenEntry[] =
+                      data.expoPushTokens || [];
+                    const filteredTokens = currentTokens.filter(
+                      (entry: ExpoPushTokenEntry) =>
+                        entry.deviceId !== deviceId,
+                    );
+
+                    db.collection("students").doc(studentId).update({
+                      expoPushTokens: filteredTokens,
+                    });
+
+                    console.log(
+                      `Removed invalid token for device ${deviceId} in student ${studentId}`,
+                    );
                   });
               });
             }
