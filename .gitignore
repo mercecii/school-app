@@ -49,3 +49,6 @@ app-example
 #keystore
 android/app/keystore/*
 *.keystore
+
+
+*/**/serviceAccount.json
