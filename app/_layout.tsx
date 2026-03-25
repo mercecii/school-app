@@ -1,3 +1,4 @@
+import NotRegisteredScreen from "@/components/NotRegisteredScreen";
 import { AdminDoc, StudentDoc } from "@/firebaseSetup/fireBase.types";
 import {
   addNotificationResponseReceivedListener,
@@ -44,6 +45,7 @@ function AuthGate() {
   const segments = useSegments();
   const { userInfo, role } = useSelector((state: AppState) => state.auth);
   const [loading, setLoading] = useState(true);
+  const [isNotRegistered, setIsNotRegistered] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -56,6 +58,7 @@ function AuthGate() {
       if (!u) {
         dispatch(setUser(null));
         dispatch(setRole(null));
+        setIsNotRegistered(false);
         setLoading(false);
         return;
       }
@@ -68,6 +71,7 @@ function AuthGate() {
       console.log("Admin data:", adminData);
 
       if (adminData) {
+        setIsNotRegistered(false);
         dispatch(setRole("admin"));
         dispatch(
           setUser({
@@ -85,6 +89,7 @@ function AuthGate() {
       console.log("Student data:", studentData);
 
       if (studentData) {
+        setIsNotRegistered(false);
         dispatch(setRole("student"));
         dispatch(
           setUser({
@@ -96,7 +101,12 @@ function AuthGate() {
         setLoading(false);
         return;
       }
-      setLoading(true);
+
+      // Auth user exists but no matching Firestore profile in admins/students.
+      dispatch(setUser(null));
+      dispatch(setRole(null));
+      setIsNotRegistered(true);
+      setLoading(false);
     });
 
     return unsubscribe;
@@ -150,6 +160,10 @@ function AuthGate() {
         <ActivityIndicator size="large" />
       </View>
     );
+  }
+
+  if (!loading && isNotRegistered) {
+    return <NotRegisteredScreen />;
   }
 
   if (!loading && !userInfo && segments[0] !== "(auth)") {
