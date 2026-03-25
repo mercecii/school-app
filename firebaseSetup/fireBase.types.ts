@@ -10,18 +10,18 @@ export type AdminDoc = {
   email: string;
   fullName: string;
   isActive: boolean;
-  lastLoginAt: string; // or Date if you prefer to parse timestamps
+  lastLoginAt: Timestamp; // or Date if you prefer to parse timestamps
   phone: string;
   role: string;
   updatedAt: Timestamp;
 };
 
 export type NotificationDoc = {
-  createdAt: string; // or Date
+  createdAt: Timestamp; // or Date
   createdBy: string;
   isActive: boolean;
   message: string;
-  readAt: string | null; // or Date | null (optional timestamp)
+  readAt: Timestamp | null; // or Date | null (optional timestamp)
   readBy: string[]; // array of user IDs
   readReceipt: boolean;
   targetType: string;
@@ -44,7 +44,7 @@ export type ExpoPushTokenEntry = {
  */
 export type StudentDoc = {
   class: string;
-  createdAt: Timestamp; // or Date
+  createdAt: Timestamp; // or Date if you prefer to parse timestamps
   expoPushTokens: ExpoPushTokenEntry[]; // array of token objects
   fullname: string;
   gender: string; // or 'M' | 'F'

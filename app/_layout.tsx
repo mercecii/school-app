@@ -9,10 +9,10 @@ import { onAuthStateChanged } from "firebase/auth";
 import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Platform, View } from "react-native";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 import { auth, firestore } from "../firebaseSetup/firebaseSetup";
 import { setRole, setUser } from "../store/slices/authSlice";
-import { AppState, store } from "../store/store";
+import { AppState, store, useAppDispatch } from "../store/store";
 
 // Load fonts for web
 if (Platform.OS === "web") {
@@ -46,7 +46,7 @@ function AuthGate() {
   const { userInfo, role } = useSelector((state: AppState) => state.auth);
   const [loading, setLoading] = useState(true);
   const [isNotRegistered, setIsNotRegistered] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const router = useRouter();
 
   useEffect(() => {
@@ -77,7 +77,8 @@ function AuthGate() {
           setUser({
             ...adminData,
             updatedAt: adminData.updatedAt.toString(),
-            createdAt: adminData.updatedAt.toString(),
+            createdAt: adminData.createdAt.toString(),
+            lastLoginAt: adminData.lastLoginAt.toString(),
           }),
         );
         setLoading(false);
@@ -95,7 +96,7 @@ function AuthGate() {
           setUser({
             ...studentData,
             updatedAt: studentData.updatedAt.toString(),
-            createdAt: studentData.updatedAt.toString(),
+            createdAt: studentData.createdAt.toString(),
           }),
         );
         setLoading(false);

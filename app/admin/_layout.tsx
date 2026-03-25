@@ -81,6 +81,15 @@ const AdminLayout = () => {
               ),
             }}
           />
+          <Drawer.Screen
+            name="add-student"
+            options={{
+              title: "Add Student",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="account-plus-outline" color={color} size={size} />
+              ),
+            }}
+          />
         </Drawer>
       </GestureHandlerRootView>
     </UserContext.Provider>

@@ -61,8 +61,10 @@ npm run generate-ipa           # EAS Build — iOS release
 
 - **Path alias:** `@/*` maps to project root — use `@/store/store` not `../../store/store`
 - **Typed Firestore:** Use `getTypedDoc<T>()` helper for type-safe document fetches
+- **Schema discipline:** Before creating/updating Firestore docs, verify field names against `functions/exports/firestore-schema.json` and existing TS types; avoid ad-hoc fields unless schema is intentionally updated
 - **Auth types:** `AdminWithStringDate` / `StudentwithStringDate` convert Firestore timestamps to strings for Redux serialization
 - **Role detection:** `getRoleAsync(uid)` checks `admins` first, then `students`
+- **Students writes:** Use `fullname` (not `name`) and keep student document shape aligned with schema-backed fields (`class`, `parentPhone`, timestamps, etc.)
 - **Push token management:** Always use `savePushToken()` / `removePushToken()` from `utils/pushTokenManager.ts` — never write tokens directly to Firestore
 - **Branding:** School name, logo, and primary color live in `config/branding.ts`
 - **New screens:** Add to `app/pages/` for students or `app/admin/` for admins, register in the corresponding drawer `_layout.tsx`

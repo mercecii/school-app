@@ -1,14 +1,19 @@
 import { AdminDoc, StudentDoc } from "@/firebaseSetup/fireBase.types";
 
-export type AdminWithStringDate = Omit<AdminDoc, "createdAt" | "updatedAt"> & {
+export type AdminWithStringDate = Omit<
+  AdminDoc,
+  "createdAt" | "updatedAt" | "lastLoginAt"
+> & {
   createdAt: string;
   updatedAt: string;
+  lastLoginAt: string;
 };
 
 export type StudentwithStringDate = Omit<
   StudentDoc,
-  "createdAt" | "updatedAt"
+  "createdAt" | "updatedAt" | "lastLoginAt"
 > & {
   createdAt: string;
   updatedAt: string;
+  lastLoginAt: string;
 };
