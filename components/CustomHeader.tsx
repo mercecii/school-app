@@ -1,12 +1,16 @@
-import { StudentwithStringDate } from "@/store/slices/auth.type";
+import {
+  AdminWithStringDate,
+  StudentwithStringDate,
+} from "@/store/slices/auth.type";
 import { HeaderTitleProps } from "@react-navigation/elements";
 import { Text, View } from "react-native";
 import { AppState, useAppSelector } from "../store/store";
 
 const CustomHeader = (props: HeaderTitleProps) => {
-  const studentInfo = useAppSelector(
-    (state: AppState) => state.auth.userInfo,
-  ) as StudentwithStringDate;
+  const { userInfo, role } = useAppSelector((state: AppState) => state.auth);
+  const studentInfo =
+    role === "student" ? (userInfo as StudentwithStringDate) : null;
+  const adminInfo = role === "admin" ? (userInfo as AdminWithStringDate) : null;
   const screenTitle = typeof props.children === "string" ? props.children : "";
 
   return (
@@ -28,6 +32,11 @@ const CustomHeader = (props: HeaderTitleProps) => {
             " · CLASS - " +
             (studentInfo.class ?? "") +
             (studentInfo.section ?? "")}
+        </Text>
+      )}
+      {adminInfo && (
+        <Text style={{ fontWeight: "600" }}>
+          {adminInfo.fullName || "No Admin info"}
         </Text>
       )}
     </View>

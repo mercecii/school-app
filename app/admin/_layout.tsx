@@ -54,7 +54,7 @@ const AdminLayout = () => {
                       style={{ padding: 10 }}
                       onPress={() => {
                         setMenuVisible(false);
-                        router.push("/pages/profile");
+                        router.push("/admin/profile");
                       }}
                     >
                       <Text>My Profile</Text>
@@ -75,9 +75,18 @@ const AdminLayout = () => {
           <Drawer.Screen
             name="index"
             options={{
-              title: "Dashboard",
+              title: "Home",
               drawerIcon: ({ color, size }) => (
-                <Icon name="view-dashboard-outline" color={color} size={size} />
+                <Icon name="home" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="profile"
+            options={{
+              title: "Profile",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="account-outline" color={color} size={size} />
               ),
             }}
           />
@@ -87,6 +96,15 @@ const AdminLayout = () => {
               title: "Add Student",
               drawerIcon: ({ color, size }) => (
                 <Icon name="account-plus-outline" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="create-notification"
+            options={{
+              title: "Create Notifications",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="bell-outline" color={color} size={size} />
               ),
             }}
           />
