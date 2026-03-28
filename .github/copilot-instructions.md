@@ -76,3 +76,12 @@ npm run generate-ipa           # EAS Build — iOS release
 - Cloud Functions deploy from `functions/` with separate `tsconfig.json` and `package.json`
 - Android package: `com.mercecii.schoolapp` · Firebase project: `ssr-juniors`
 - React Compiler and typed routes are experimental features enabled in `app.json`
+
+## Auth & User Linking Rules
+
+- Firebase Auth UID must match Firestore document ID: students/{uid}
+- Do NOT create random student document IDs for authenticated users
+- Admin creates student records before user login
+- After phone OTP login, system must link auth user to existing student via phone number
+- If no student is found → show "Account Not Activated" screen
+- Never auto-create users silently in Firestore

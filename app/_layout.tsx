@@ -150,7 +150,9 @@ function AuthGate() {
     // Delay navigation until after layout is fully mounted
     requestAnimationFrame(() => {
       if (data?.screen === "notifications") {
-        router.replace("/pages/notifications");
+        if (role === "student") {
+          router.replace("/pages/notifications");
+        }
       }
     });
   };
@@ -167,18 +169,23 @@ function AuthGate() {
     return <NotRegisteredScreen />;
   }
 
-  if (!loading && !userInfo && segments[0] !== "(auth)") {
+  const topSegment = segments[0];
+  const isAuthRoute = topSegment === "(auth)";
+  const isAdminRoute = topSegment === "admin";
+  const isStudentRoute = topSegment === "pages";
+
+  if (!loading && !userInfo && !isAuthRoute) {
     console.log("Redirecting to login because user is not authenticated");
     return <Redirect href="/(auth)/login" />;
   }
 
-  if (!loading && userInfo && segments[0] === "(auth)" && role === "admin") {
-    console.log("Redirecting to admin dashboard");
+  if (!loading && userInfo && role === "admin" && !isAdminRoute) {
+    console.log("Redirecting admin to admin routes only");
     return <Redirect href="/admin" />;
   }
 
-  if (!loading && userInfo && segments[0] === "(auth)" && role === "student") {
-    console.log("Redirecting to student dashboard");
+  if (!loading && userInfo && role === "student" && !isStudentRoute) {
+    console.log("Redirecting student to student routes only");
     return <Redirect href="/pages" />;
   }
 
