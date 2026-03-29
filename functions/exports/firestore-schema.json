@@ -5,110 +5,44 @@
     "admins": {
       "sampledDocs": 1,
       "fields": {
-        "createdAt": [
-          "timestamp"
-        ],
-        "email": [
-          "string"
-        ],
-        "fullName": [
-          "string"
-        ],
-        "isActive": [
-          "boolean"
-        ],
-        "lastLoginAt": [
-          "timestamp"
-        ],
-        "phone": [
-          "string"
-        ],
-        "role": [
-          "string"
-        ],
-        "updatedAt": [
-          "timestamp"
-        ]
+        "createdAt": ["timestamp"],
+        "email": ["string"],
+        "fullName": ["string"],
+        "isActive": ["boolean"],
+        "lastLoginAt": ["timestamp"],
+        "phone": ["string"],
+        "role": ["string"],
+        "updatedAt": ["timestamp"]
       }
     },
     "notifications": {
       "sampledDocs": 6,
       "fields": {
-        "createdAt": [
-          "timestamp"
-        ],
-        "createdBy": [
-          "string"
-        ],
-        "isActive": [
-          "boolean"
-        ],
-        "message": [
-          "string"
-        ],
-        "readAt": [
-          "null",
-          "timestamp"
-        ],
-        "readBy": [
-          "array<string>"
-        ],
-        "readReceipt": [
-          "boolean"
-        ],
-        "targetType": [
-          "string"
-        ],
-        "targetValue": [
-          "string"
-        ],
-        "title": [
-          "string"
-        ]
+        "createdAt": ["timestamp"],
+        "createdBy": ["string"],
+        "isActive": ["boolean"],
+        "message": ["string"],
+        "targetType": ["string"],
+        "targetValue": ["string"],
+        "title": ["string"]
       }
     },
     "students": {
       "sampledDocs": 1,
       "fields": {
-        "class": [
-          "string"
-        ],
-        "createdAt": [
-          "timestamp"
-        ],
-        "expoPushTokens": [
-          "array<string>"
-        ],
-        "fullname": [
-          "string"
-        ],
-        "gender": [
-          "string"
-        ],
-        "isActive": [
-          "boolean"
-        ],
-        "parentEmail": [
-          "string"
-        ],
-        "parentName": [
-          "string"
-        ],
-        "parentPhone": [
-          "string"
-        ],
-        "role": [
-          "string"
-        ],
-        "rollNumber": [
-          "string"
-        ],
-        "section": [
-          "string"
-        ],
-        "updatedAt": [
-          "timestamp"
-        ]
+        "class": ["string"],
+        "createdAt": ["timestamp"],
+        "name": ["string"],
+        "gender": ["string"],
+        "isActive": ["boolean"],
+        "parentEmail": ["string"],
+        "parentName": ["string"],
+        "parentPhone": ["string"],
+        "role": ["string"],
+        "rollNumber": ["string"],
+        "section": ["string"],
+        "updatedAt": ["timestamp"],
+        "authUid": ["string", "null"]
       }
     }
   }

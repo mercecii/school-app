@@ -43,17 +43,17 @@ types/                 # Shared TypeScript types
 ## Build & Test
 
 ```bash
-npm install                    # Install dependencies
+yarn                          # Install dependencies
 npx expo start                 # Dev server
-npm run android                # Run on Android
-npm run ios                    # Run on iOS
-npm run lint                   # ESLint
-npm run export-web             # Static web export
-npm run generate-apk           # EAS Build — Android release
-npm run generate-ipa           # EAS Build — iOS release
+yarn android                   # Run on Android
+yarn ios                       # Run on iOS
+yarn lint                      # ESLint
+yarn export-web                # Static web export
+yarn generate-apk              # EAS Build — Android release
+yarn generate-ipa              # EAS Build — iOS release
 ```
 
-**Cloud Functions:** `cd functions && npm install && npm run build`
+**Cloud Functions:** `cd functions && yarn && yarn build`
 
 **EAS profiles:** `development` (internal), `preview` (internal APK/IPA), `production` (store)
 

@@ -1,5 +1,6 @@
 import NotRegisteredScreen from "@/components/NotRegisteredScreen";
-import { AdminDoc, StudentDoc } from "@/firebaseSetup/fireBase.types";
+import { AdminDoc } from "@/firebaseSetup/fireBase.types";
+import { ensureStudentDocUsesUid } from "@/utils/studentLinking";
 import {
   addNotificationResponseReceivedListener,
   getLastNotificationResponseAsync,
@@ -86,7 +87,7 @@ function AuthGate() {
       }
       // USER SET
       // SETTING UP USER'S COMPLETE PROFILE IN LOCAL REDUX
-      const studentData = await getTypedDoc<StudentDoc>("students", uid);
+      const studentData = await ensureStudentDocUsesUid(u);
       console.log("Student data:", studentData);
 
       if (studentData) {

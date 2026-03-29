@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "400666905468",
-    "project_id": "ssr-juniors-dev",
-    "storage_bucket": "ssr-juniors-dev.firebasestorage.app"
+    "project_number": "198371863429",
+    "project_id": "ssr-juniors",
+    "storage_bucket": "ssr-juniors.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:400666905468:android:2a155c24fdcee737dfb2f9",
+        "mobilesdk_app_id": "1:198371863429:android:14e48806828f8a43f472ec",
         "android_client_info": {
           "package_name": "com.mercecii.schoolapp"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAl0a2ejZzncZQtyBUUlARb9iGjh_2IBBs"
+          "current_key": "AIzaSyCy_gdihtnVmlJsM1wbzAvmR4tIfviqt_0"
         }
       ],
       "services": {
