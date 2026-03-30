@@ -2,7 +2,7 @@ import { Redirect, useSegments } from "expo-router";
 
 import { getRoleAsync } from "@/utils/getRoleAsync";
 import React, { useEffect, useState } from "react";
-import { auth } from "../firebaseSetup/firebaseSetup";
+import { auth } from "../utils/authClient";
 
 const Index = () => {
   const [userRole, setUserRole] = useState<string>("");

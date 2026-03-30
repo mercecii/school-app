@@ -1,6 +1,5 @@
-import { auth } from "@/firebaseSetup/firebaseSetup";
+import { auth, signOut } from "@/utils/authClient";
 import { useRouter } from "expo-router";
-import { signOut } from "firebase/auth";
 import { useState } from "react";
 import {
   ActivityIndicator,

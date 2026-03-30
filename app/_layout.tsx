@@ -6,14 +6,15 @@ import {
   getLastNotificationResponseAsync,
 } from "expo-notifications";
 import { Redirect, Slot, useRouter, useSegments } from "expo-router";
-import { onAuthStateChanged } from "firebase/auth";
 import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Platform, View } from "react-native";
 import { Provider, useSelector } from "react-redux";
-import { auth, firestore } from "../firebaseSetup/firebaseSetup";
+import { firestore } from "../firebaseSetup/firebaseSetup";
 import { setRole, setUser } from "../store/slices/authSlice";
 import { AppState, store, useAppDispatch } from "../store/store";
+import type { AuthUser } from "../utils/authClient";
+import { auth, onAuthStateChanged } from "../utils/authClient";
 
 // Load fonts for web
 if (Platform.OS === "web") {
@@ -51,7 +52,7 @@ function AuthGate() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+    const unsubscribe = onAuthStateChanged(auth, async (u: AuthUser | null) => {
       console.log("Auth state changed, user:", u);
 
       if (u === undefined) return;

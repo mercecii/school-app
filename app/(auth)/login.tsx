@@ -1,10 +1,10 @@
 import { defaultBranding } from "@/config/branding";
 import { ensureStudentDocUsesUid } from "@/utils/studentLinking";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -13,80 +13,106 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  auth,
+  AuthConfirmationResult,
+  signInWithPhoneNumber,
+  signOut,
+} from "../../utils/authClient";
 
 const PRIMARY = defaultBranding.primaryColor;
 
 export default function Login() {
+  const isWeb = Platform.OS === "web";
   const [phoneNumber, setPhoneNumber] = useState("+91");
-  const [code, setCode] = useState("");
   const [confirmationResult, setConfirmationResult] =
-    useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
+    useState<AuthConfirmationResult | null>(null);
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const router = useRouter();
 
   const handleSendOtp = async () => {
-    const trimmed = phoneNumber.trim();
-
-    if (!/^\+\d{10,15}$/.test(trimmed)) {
-      setError("Enter a valid phone number in E.164 format.");
+    if (isWeb) {
+      Alert.alert(
+        "Not supported",
+        "Phone login is only supported on mobile app",
+      );
       return;
     }
 
-    setError("");
+    const trimmed = phoneNumber.trim();
+
+    if (!/^\+\d{10,15}$/.test(trimmed)) {
+      Alert.alert(
+        "Invalid phone number",
+        "Enter a valid phone number in E.164 format.",
+      );
+      return;
+    }
+
     setLoading(true);
     try {
-      console.log("Using project:", auth().app.options.projectId);
+      console.log("Using project:", auth.app.options.projectId);
       console.log("Sending OTP to:", trimmed);
 
-      const result = await auth().signInWithPhoneNumber(trimmed);
+      // Use modular SDK's signInWithPhoneNumber which works on React Native
+      // with the auth instance initialized in firebaseSetup.ts
+      const result = await signInWithPhoneNumber(auth, trimmed);
       setConfirmationResult(result);
     } catch (e: any) {
       console.error("OTP send error:", e);
-      setError("Failed to send OTP. Check the phone number and try again.");
+
+      Alert.alert(
+        "OTP failed",
+        "Failed to send OTP. Check the phone number and try again.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerifyOtp = async () => {
-    if (!confirmationResult) {
-      setError("Please request OTP first.");
+    if (isWeb) {
+      Alert.alert(
+        "Not supported",
+        "Phone login is only supported on mobile app",
+      );
       return;
     }
 
-    const trimmed = code.trim();
+    if (!confirmationResult) {
+      console.error(
+        "OTP verification attempted without a confirmation result.",
+      );
+      Alert.alert("OTP required", "Please request OTP first.");
+      return;
+    }
+
+    const trimmed = otp.trim();
     if (!trimmed) {
-      setError("Enter OTP code.");
+      Alert.alert("OTP required", "Enter OTP code.");
       return;
     }
 
     if (!/^\d{6}$/.test(trimmed)) {
-      setError("Enter the 6-digit OTP.");
+      Alert.alert("Invalid OTP", "Enter the 6-digit OTP.");
       return;
     }
 
-    setError("");
     setLoading(true);
     try {
-      await confirmationResult.confirm(trimmed);
-
-      const user = auth().currentUser;
+      const userCredential = await confirmationResult.confirm(trimmed);
+      const user = userCredential.user;
       if (!user) {
-        setError("Login failed. Please try again.");
+        Alert.alert("Login failed", "Please try again.");
         return;
       }
 
-      console.log("OTP verified. UID:", user.uid);
       const studentData = await ensureStudentDocUsesUid(user);
-      console.log(
-        "Student linking result:",
-        studentData ? "linked" : "not-found",
-      );
 
       if (!studentData) {
-        await auth().signOut();
+        await signOut(auth);
         router.replace("/(auth)/account-not-activated");
         return;
       }
@@ -94,7 +120,8 @@ export default function Login() {
       router.replace("/pages");
     } catch (e: any) {
       console.error("OTP verify error:", e);
-      setError("Invalid OTP. Please try again.");
+      console.error("Error code:", e.code);
+      Alert.alert("Invalid OTP", "Please try again.");
     } finally {
       setLoading(false);
     }
@@ -122,19 +149,25 @@ export default function Login() {
         />
 
         <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
+          style={[styles.button, (loading || isWeb) && styles.buttonDisabled]}
           onPress={handleSendOtp}
-          disabled={loading}
+          disabled={loading || isWeb}
         >
           <Text style={styles.buttonText}>Send OTP</Text>
         </TouchableOpacity>
+
+        {isWeb ? (
+          <Text style={styles.infoText}>
+            Phone login is only supported on mobile app
+          </Text>
+        ) : null}
 
         <TextInput
           style={styles.input}
           placeholder="123456"
           placeholderTextColor="#888"
-          value={code}
-          onChangeText={setCode}
+          value={otp}
+          onChangeText={setOtp}
           keyboardType="number-pad"
           maxLength={6}
           editable={!loading}
@@ -156,7 +189,6 @@ export default function Login() {
         ) : null}
 
         {loading ? <ActivityIndicator style={styles.loader} /> : null}
-        {error ? <Text style={styles.error}>{error}</Text> : null}
       </View>
     </KeyboardAvoidingView>
   );
@@ -229,11 +261,5 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 8,
-  },
-  error: {
-    marginTop: 10,
-    color: "#dc2626",
-    fontSize: 14,
-    textAlign: "center",
   },
 });

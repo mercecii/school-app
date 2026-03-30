@@ -6,7 +6,7 @@ import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserContext } from "../../context/UserContext";
-import { auth } from "../../firebaseSetup/firebaseSetup";
+import { auth } from "../../utils/authClient";
 
 export default function RootLayoutLevel2() {
   console.log("eee: app/pages/_layout.tsx");

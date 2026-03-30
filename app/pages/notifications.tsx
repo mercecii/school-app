@@ -1,4 +1,3 @@
-import { getAuth } from "firebase/auth";
 import {
   arrayUnion,
   collection,
@@ -17,10 +16,10 @@ import {
   View,
 } from "react-native";
 import { firestore } from "../../firebaseSetup/firebaseSetup";
+import { auth } from "../../utils/authClient";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState<any[]>([]);
-  const auth = getAuth();
   const currentUser = auth.currentUser;
 
   useEffect(() => {

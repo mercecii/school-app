@@ -15,9 +15,10 @@ import {
   View,
 } from "react-native";
 import { useSelector } from "react-redux";
-import { auth, firestore } from "../../firebaseSetup/firebaseSetup";
+import { firestore } from "../../firebaseSetup/firebaseSetup";
 import { AdminWithStringDate } from "../../store/slices/auth.type";
 import { AppState } from "../../store/store";
+import { auth } from "../../utils/authClient";
 
 export default function AdminNotifications() {
   const userInfo: AdminWithStringDate = useSelector(

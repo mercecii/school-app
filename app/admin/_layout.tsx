@@ -1,13 +1,12 @@
 import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import Drawer from "expo-router/drawer";
-import { signOut } from "firebase/auth";
 import React, { useState } from "react";
 import { StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CustomHeader from "../../components/CustomHeader";
 import { UserContext } from "../../context/UserContext";
-import { auth } from "../../firebaseSetup/firebaseSetup";
+import { auth, signOut } from "../../utils/authClient";
 
 const AdminLayout = () => {
   console.log("eee: app/admin/_layout.tsx");
@@ -30,7 +29,7 @@ const AdminLayout = () => {
         <StatusBar style="dark" />
         <Drawer
           screenOptions={{
-            headerTitle: () => <CustomHeader />,
+            headerTitle: (props) => <CustomHeader {...props} />,
             headerRight: () => (
               <View style={{ marginRight: 16 }}>
                 <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>

@@ -1,9 +1,8 @@
-import { auth } from "@/firebaseSetup/firebaseSetup";
 import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { signOut } from "firebase/auth";
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import { auth, signOut } from "../utils/authClient";
 
 export interface HeaderRightProps {
   tintColor?: string | undefined;
@@ -58,5 +57,3 @@ const HeaderRight = (props: HeaderRightProps) => {
 };
 
 export default HeaderRight;
-
-const styles = StyleSheet.create({});
