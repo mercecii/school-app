@@ -2,6 +2,7 @@ import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import {
   getAuth as getNativeAuth,
   onAuthStateChanged as nativeOnAuthStateChanged,
+  signInWithEmailAndPassword as nativeSignInWithEmailAndPassword,
   signInWithPhoneNumber as nativeSignInWithPhoneNumber,
   signOut as nativeSignOut,
 } from "@react-native-firebase/auth";
@@ -82,6 +83,22 @@ export async function signInWithPhoneNumber(
 
     throw error;
   }
+}
+
+export async function signInWithEmailAndPassword(
+  currentAuth: AuthClient,
+  email: string,
+  password: string,
+): Promise<FirebaseAuthTypes.UserCredential> {
+  if (Platform.OS === "web") {
+    throw new Error("Email/password login is only supported on mobile app");
+  }
+
+  return nativeSignInWithEmailAndPassword(
+    currentAuth as NativeAuth,
+    email,
+    password,
+  );
 }
 
 export async function signOut(currentAuth: AuthClient): Promise<void> {

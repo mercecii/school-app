@@ -103,6 +103,10 @@ export default function Login() {
     setLoading(true);
     try {
       const userCredential = await confirmationResult.confirm(trimmed);
+      if (!userCredential) {
+        Alert.alert("Login failed", "Please try again.");
+        return;
+      }
       const user = userCredential.user;
       if (!user) {
         Alert.alert("Login failed", "Please try again.");
@@ -188,6 +192,14 @@ export default function Login() {
           <Text style={styles.infoText}>OTP sent. Enter the 6-digit code.</Text>
         ) : null}
 
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={() => router.replace("/(auth)/admin-login")}
+          disabled={loading}
+        >
+          <Text style={styles.secondaryText}>Admin? Login with email</Text>
+        </TouchableOpacity>
+
         {loading ? <ActivityIndicator style={styles.loader} /> : null}
       </View>
     </KeyboardAvoidingView>
@@ -258,6 +270,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: "center",
     marginTop: 4,
+  },
+  secondaryButton: {
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  secondaryText: {
+    color: PRIMARY,
+    fontSize: 14,
+    fontWeight: "600",
   },
   loader: {
     marginTop: 8,
