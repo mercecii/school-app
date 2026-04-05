@@ -7,10 +7,13 @@ import {
 } from "firebase/firestore";
 import { useState } from "react";
 import {
+  Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -29,25 +32,51 @@ export default function AdminNotifications() {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
 
+  const showToast = (toastMessage: string) => {
+    if (Platform.OS === "android") {
+      ToastAndroid.show(toastMessage, ToastAndroid.SHORT);
+      return;
+    }
+
+    Alert.alert("Notification", toastMessage);
+  };
+
   const handleSend = async () => {
-    await addDoc(
-      collection(firestore, "notifications") as CollectionReference<
-        NotificationDoc,
-        NotificationDoc
-      >,
-      {
-        title,
-        message,
-        targetType: "ALL",
-        createdBy: auth.currentUser?.uid as string,
-        createdAt: serverTimestamp(),
-        isActive: true,
-        readReceipt: false,
-        readAt: null,
-        readBy: [],
-        targetValue: "",
-      },
-    );
+    const trimmedTitle = title.trim();
+    const trimmedMessage = message.trim();
+
+    if (!trimmedTitle || !trimmedMessage) {
+      showToast("Please enter both title and message.");
+      return;
+    }
+
+    try {
+      await addDoc(
+        collection(firestore, "notifications") as CollectionReference<
+          NotificationDoc,
+          NotificationDoc
+        >,
+        {
+          title: trimmedTitle,
+          message: trimmedMessage,
+          targetType: "ALL",
+          createdBy: auth.currentUser?.uid as string,
+          createdAt: serverTimestamp(),
+          isActive: true,
+          readReceipt: false,
+          readAt: null,
+          readBy: [],
+          targetValue: "",
+        },
+      );
+
+      setTitle("");
+      setMessage("");
+      showToast("Notification added successfully.");
+    } catch (error) {
+      console.error("Failed to add notification:", error);
+      showToast("Failed to add notification.");
+    }
   };
 
   console.log("eee: app/admin/index.tsx | user:", userInfo);

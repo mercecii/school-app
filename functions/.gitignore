@@ -12,3 +12,5 @@ node_modules/
 
 
 serviceAccount.json
+serviceAccount-dev.json
+serviceAccount-prod.json

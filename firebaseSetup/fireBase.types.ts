@@ -30,22 +30,11 @@ export type NotificationDoc = {
 };
 
 /**
- * Expo Push Token Entry (per device)
- */
-export type ExpoPushTokenEntry = {
-  token: string;
-  deviceId: string;
-  platform: "android" | "ios";
-  lastSeenAt: Timestamp;
-};
-
-/**
  * Firestore Student Document (raw DB structure)
  */
 export type StudentDoc = {
   class: string;
   createdAt: Timestamp; // or Date if you prefer to parse timestamps
-  expoPushTokens: ExpoPushTokenEntry[]; // array of token objects
   fullname: string;
   gender: string; // or 'M' | 'F'
   isActive: boolean;

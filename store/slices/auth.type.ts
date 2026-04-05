@@ -11,9 +11,8 @@ export type AdminWithStringDate = Omit<
 
 export type StudentwithStringDate = Omit<
   StudentDoc,
-  "createdAt" | "updatedAt" | "lastLoginAt"
+  "createdAt" | "updatedAt"
 > & {
   createdAt: string;
   updatedAt: string;
-  lastLoginAt: string;
 };

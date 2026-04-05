@@ -1,5 +1,6 @@
 import { defaultBranding } from "@/config/branding";
 import { ensureStudentDocUsesUid } from "@/utils/studentLinking";
+import { registerForPushNotificationsAsync } from "@/utils/utils";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -121,6 +122,7 @@ export default function Login() {
         return;
       }
 
+      await registerForPushNotificationsAsync();
       router.replace("/pages");
     } catch (e: any) {
       console.error("OTP verify error:", e);

@@ -52,3 +52,5 @@ android/app/keystore/*
 
 
 */**/serviceAccount.json
+*/**/serviceAccount-dev.json
+*/**/serviceAccount-prod.json

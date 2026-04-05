@@ -30,9 +30,10 @@ export default function AdminLogin() {
 
   const handleAdminLogin = async () => {
     const trimmedEmail = email.trim().toLowerCase();
-
+    console.log("Attempting admin login with email:", trimmedEmail);
     if (!trimmedEmail || !password) {
       Alert.alert("Missing details", "Enter email and password.");
+      console.log("Login failed: Missing email or password");
       return;
     }
 
@@ -46,6 +47,9 @@ export default function AdminLogin() {
       const uid = credential.user?.uid;
 
       if (!uid) {
+        console.log(
+          "Login failed: No UID returned from signInWithEmailAndPassword",
+        );
         Alert.alert("Login failed", "Unable to validate admin account.");
         await signOut(auth);
         return;
@@ -61,6 +65,7 @@ export default function AdminLogin() {
 
       router.replace("/admin");
     } catch (error: any) {
+      console.error("Admin login error:", error);
       const code = String(error?.code ?? "");
       if (code.includes("auth/invalid-credential")) {
         Alert.alert("Login failed", "Invalid email or password.");

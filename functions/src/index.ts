@@ -24,17 +24,15 @@ type NotificationDocument = {
   targetValue: string;
 };
 
-type ExpoPushTokenEntry = {
-  token: string;
-  deviceId: string;
-  platform: "android" | "ios";
-  lastSeenAt: any;
-};
-
 type StudentDocument = {
   id: string;
   class?: string;
-  expoPushTokens?: ExpoPushTokenEntry[];
+};
+
+type DeviceDocument = {
+  token?: string;
+  platform?: "android" | "ios";
+  updatedAt?: any;
 };
 
 type ExpoMessage = {
@@ -62,9 +60,20 @@ export const sendExpoNotification = onDocumentCreated(
   "notifications/{id}",
   async (event: FirestoreEvent<FunctionsQueryDocumentSnapshot | undefined>) => {
     const snapshot = event.data;
-    if (!snapshot) return;
+    if (!snapshot) {
+      console.log("🔕 sendExpoNotification fired without snapshot data");
+      return;
+    }
 
+    const notificationId = event.params.id;
     const notification = snapshot.data() as NotificationDocument;
+
+    console.log("🚀 sendExpoNotification triggered", {
+      notificationId,
+      targetType: notification.targetType,
+      targetValue: notification.targetValue ?? "",
+      title: notification.title,
+    });
 
     // 1. Fetch target students
     let students: StudentDocument[] = [];
@@ -98,40 +107,50 @@ export const sendExpoNotification = onDocumentCreated(
       }
     }
 
-    // 2. Collect tokens (supports mixed old/new formats during migration)
+    console.log("👥 Target students resolved", {
+      notificationId,
+      count: students.length,
+      studentIds: students.map((student) => student.id),
+    });
+
+    // 2. Collect tokens from students/{uid}/devices/{deviceId}
     const tokenMap: Record<string, { studentId: string; deviceId: string }[]> =
       {};
     const tokens: string[] = [];
 
-    students.forEach((student) => {
-      const entries = Array.isArray(student.expoPushTokens)
-        ? (student.expoPushTokens as any[])
-        : [];
+    const deviceSnaps = await Promise.all(
+      students.map((student) =>
+        db.collection("students").doc(student.id).collection("devices").get(),
+      ),
+    );
 
-      entries.forEach((entry) => {
-        const token =
-          typeof entry === "string"
-            ? entry
-            : typeof entry?.token === "string"
-              ? entry.token
-              : "";
-
+    deviceSnaps.forEach((snap, studentIdx) => {
+      const studentId = students[studentIdx].id;
+      snap.docs.forEach((deviceDoc) => {
+        const data = deviceDoc.data() as DeviceDocument;
+        const token = typeof data.token === "string" ? data.token : "";
         if (!token) return;
 
-        const deviceId =
-          typeof entry === "object" && typeof entry?.deviceId === "string"
-            ? entry.deviceId
-            : token;
-
         if (!tokenMap[token]) tokenMap[token] = [];
-        tokenMap[token].push({ studentId: student.id, deviceId });
+        tokenMap[token].push({ studentId, deviceId: deviceDoc.id });
         tokens.push(token);
       });
     });
 
     const uniqueTokens = Array.from(new Set(tokens));
 
-    if (uniqueTokens.length === 0) return;
+    console.log("📱 Device tokens collected", {
+      notificationId,
+      rawTokenCount: tokens.length,
+      uniqueTokenCount: uniqueTokens.length,
+    });
+
+    if (uniqueTokens.length === 0) {
+      console.log("⚠️ No device tokens found for notification", {
+        notificationId,
+      });
+      return;
+    }
 
     // 3. Prepare messages
     const messages: ExpoMessage[] = uniqueTokens.map((token) => ({
@@ -146,6 +165,14 @@ export const sendExpoNotification = onDocumentCreated(
     const chunkSize = 100;
     for (let i = 0; i < messages.length; i += chunkSize) {
       const batch = messages.slice(i, i + chunkSize);
+      const batchNumber = Math.floor(i / chunkSize) + 1;
+
+      console.log("📤 Sending Expo push batch", {
+        notificationId,
+        batchNumber,
+        batchSize: batch.length,
+      });
+
       try {
         const res = await fetch("https://exp.host/--/api/v2/push/send", {
           method: "POST",
@@ -154,9 +181,17 @@ export const sendExpoNotification = onDocumentCreated(
         });
         const result = (await res.json()) as ExpoPushResponse;
 
+        console.log("📬 Expo push response", {
+          notificationId,
+          batchNumber,
+          ok: res.ok,
+          status: res.status,
+          result,
+        });
+
         // 5. Cleanup tokens
         if (Array.isArray(result.data)) {
-          result.data.forEach((ticket: ExpoTicket, idx: number) => {
+          for (const [idx, ticket] of result.data.entries()) {
             if (
               ticket.status === "error" &&
               ticket.details &&
@@ -165,39 +200,42 @@ export const sendExpoNotification = onDocumentCreated(
               const badToken = batch[idx].to;
               const entries = tokenMap[badToken] || [];
 
-              entries.forEach(({ studentId, deviceId }) => {
-                // Get current tokens and filter out the bad device
-                db.collection("students")
-                  .doc(studentId)
-                  .get()
-                  .then((doc) => {
-                    if (!doc.exists) return;
+              await Promise.all(
+                entries.map(async ({ studentId, deviceId }) => {
+                  await db
+                    .collection("students")
+                    .doc(studentId)
+                    .collection("devices")
+                    .doc(deviceId)
+                    .delete();
 
-                    const data = doc.data();
-                    if (!data) return;
-
-                    const currentTokens: ExpoPushTokenEntry[] =
-                      data.expoPushTokens || [];
-                    const filteredTokens = currentTokens.filter(
-                      (entry: ExpoPushTokenEntry) =>
-                        entry.deviceId !== deviceId,
-                    );
-
-                    db.collection("students").doc(studentId).update({
-                      expoPushTokens: filteredTokens,
-                    });
-
-                    console.log(
-                      `Removed invalid token for device ${deviceId} in student ${studentId}`,
-                    );
-                  });
+                  console.log(
+                    `Removed invalid token for device ${deviceId} in student ${studentId}`,
+                  );
+                }),
+              );
+            } else if (ticket.status === "error") {
+              console.error("❌ Expo ticket error", {
+                notificationId,
+                batchNumber,
+                token: batch[idx]?.to,
+                ticket,
               });
             }
-          });
+          }
         }
-      } catch {
-        // Ignore batch errors
+      } catch (error) {
+        console.error("❌ Failed to send Expo push batch", {
+          notificationId,
+          batchNumber,
+          error,
+        });
       }
     }
+
+    console.log("✅ sendExpoNotification completed", {
+      notificationId,
+      totalMessages: messages.length,
+    });
   },
 );

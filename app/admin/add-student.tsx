@@ -61,7 +61,6 @@ export default function AddStudentScreen() {
         parentPhone: trimmedPhone,
         role: "student",
         isActive: true,
-        expoPushTokens: [],
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });

@@ -19,7 +19,10 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setUser(state, action: PayloadAction<Admin | Student | null>) {
+    setUser(
+      state,
+      action: PayloadAction<AdminWithStringDate | StudentwithStringDate | null>,
+    ) {
       state.userInfo = action.payload;
     },
     setRole(state, action: PayloadAction<UserRole>) {

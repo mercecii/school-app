@@ -7,8 +7,9 @@
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log",
+    "deploy-dev": "firebase deploy --only functions --project ssr-juniors-dev",
+    "deploy-prod": "firebase deploy --only functions --project ssr-juniors",
+    "logs": "firebase functions:log --only sendExpoNotification",
     "schema:infer": "node scripts/infer-firestore-schema.js"
   },
   "engines": {

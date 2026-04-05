@@ -2,6 +2,7 @@ import NotRegisteredScreen from "@/components/NotRegisteredScreen";
 import { AdminDoc } from "@/firebaseSetup/fireBase.types";
 import { ensureStudentDocUsesUid } from "@/utils/studentLinking";
 import {
+  addNotificationReceivedListener,
   addNotificationResponseReceivedListener,
   getLastNotificationResponseAsync,
 } from "expo-notifications";
@@ -15,6 +16,7 @@ import { setRole, setUser } from "../store/slices/authSlice";
 import { AppState, store, useAppDispatch } from "../store/store";
 import type { AuthUser } from "../utils/authClient";
 import { auth, onAuthStateChanged } from "../utils/authClient";
+import { configureNotificationHandlingAsync } from "../utils/utils";
 
 // Load fonts for web
 if (Platform.OS === "web") {
@@ -50,6 +52,16 @@ function AuthGate() {
   const [isNotRegistered, setIsNotRegistered] = useState(false);
   const dispatch = useAppDispatch();
   const router = useRouter();
+
+  useEffect(() => {
+    if (Platform.OS === "web") {
+      return;
+    }
+
+    configureNotificationHandlingAsync().catch((error) => {
+      console.error("❌ Failed to configure notifications on startup:", error);
+    });
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u: AuthUser | null) => {
@@ -123,20 +135,42 @@ function AuthGate() {
       return;
     }
 
-    const subscription = addNotificationResponseReceivedListener((response) => {
-      handleNotification(response);
-    });
+    const foregroundSubscription = addNotificationReceivedListener(
+      (notification) => {
+        console.log("🔔 Foreground notification received:", {
+          title: notification.request.content.title,
+          body: notification.request.content.body,
+          data: notification.request.content.data,
+        });
+      },
+    );
+
+    const responseSubscription = addNotificationResponseReceivedListener(
+      (response) => {
+        console.log("📨 Notification response received:", {
+          actionIdentifier: response.actionIdentifier,
+          data: response.notification.request.content.data,
+        });
+        handleNotification(response);
+      },
+    );
 
     const checkInitial = async () => {
       const response = await getLastNotificationResponseAsync();
       if (response) {
+        console.log("📬 Found initial notification response:", {
+          data: response.notification.request.content.data,
+        });
         handleNotification(response);
       }
     };
 
     checkInitial();
 
-    return () => subscription.remove();
+    return () => {
+      foregroundSubscription.remove();
+      responseSubscription.remove();
+    };
   }, [loading]);
 
   const handleNotification = async (response: any) => {
