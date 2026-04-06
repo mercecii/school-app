@@ -67,6 +67,7 @@ export const sendExpoNotification = onDocumentCreated(
 
     const notificationId = event.params.id;
     const notification = snapshot.data() as NotificationDocument;
+    if (!notification.title || !notification.message) return;
 
     console.log("🚀 sendExpoNotification triggered", {
       notificationId,
