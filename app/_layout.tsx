@@ -16,7 +16,10 @@ import { setRole, setUser } from "../store/slices/authSlice";
 import { AppState, store, useAppDispatch } from "../store/store";
 import type { AuthUser } from "../utils/authClient";
 import { auth, onAuthStateChanged } from "../utils/authClient";
-import { configureNotificationHandlingAsync } from "../utils/utils";
+import {
+  configureNotificationHandlingAsync,
+  registerForPushNotificationsAsync,
+} from "../utils/utils";
 
 // Load fonts for web
 if (Platform.OS === "web") {
@@ -113,6 +116,16 @@ function AuthGate() {
             createdAt: studentData.createdAt.toString(),
           }),
         );
+
+        if (Platform.OS !== "web") {
+          registerForPushNotificationsAsync(u.uid).catch((error) => {
+            console.error(
+              "❌ Failed to refresh push token after session restore:",
+              error,
+            );
+          });
+        }
+
         setLoading(false);
         return;
       }

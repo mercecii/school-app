@@ -18,7 +18,6 @@ import {
   auth,
   AuthConfirmationResult,
   signInWithPhoneNumber,
-  signOut,
 } from "../../utils/authClient";
 
 const PRIMARY = defaultBranding.primaryColor;
@@ -117,12 +116,14 @@ export default function Login() {
       const studentData = await ensureStudentDocUsesUid(user);
 
       if (!studentData) {
-        await signOut(auth);
-        router.replace("/(auth)/account-not-activated");
+        // `AuthGate` already renders the account-not-activated UI for
+        // signed-in users who do not have a linked student record.
+        // Avoid a manual `replace()` here because it can race with the auth
+        // state update and trigger the unhandled navigator warning.
         return;
       }
 
-      await registerForPushNotificationsAsync();
+      await registerForPushNotificationsAsync(user.uid);
       router.replace("/pages");
     } catch (e: any) {
       console.error("OTP verify error:", e);
