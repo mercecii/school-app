@@ -120,6 +120,14 @@ export default function AdminLogin() {
 
         <TouchableOpacity
           style={styles.secondaryButton}
+          onPress={() => router.replace("/(auth)/forgot-password")}
+          disabled={loading}
+        >
+          <Text style={styles.secondaryText}>Forgot password?</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.secondaryButton}
           onPress={() => router.replace("/(auth)/login")}
           disabled={loading}
         >
