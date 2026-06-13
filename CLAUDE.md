@@ -8,26 +8,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Install dependencies
 yarn install
 
-# Start dev server (choose platform interactively)
-npx expo start
+# Start local dev server (hits E2/QA Firebase via __DEV__=true)
+yarn start-dev
 
-# Run on Android (requires emulator or device)
-npx expo run:android
-
-# Run on iOS (requires macOS + simulator)
-npx expo run:ios
+# Run on Android device/emulator (local native build)
+yarn android
 
 # Run as web app
-npx expo start --web
+yarn web
 
 # Lint
 yarn lint
 
-# Build release APK via EAS
-npx eas build -p android --profile preview
+# Build E2 (QA) APK — uses google-services.dev.json, distributed internally
+yarn build-e2
+
+# Build E3 (production) AAB — uses google-services.prod.json, for Play Store
+yarn build-e3
+
+# Submit E3 build to Play Store production track
+yarn release
 ```
 
 There is no test suite configured. TypeScript type-checking is the primary static check, done implicitly by the Expo toolchain.
+
+## Platforms
+
+Android and Web only. iOS support has been dropped. The dual Firebase SDK abstraction (`authClient.native` / `authClient.web`) covers both remaining platforms.
 
 ## Architecture
 

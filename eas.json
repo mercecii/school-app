@@ -4,22 +4,29 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
-    "preview": {
-      "developmentClient": true,
+    "e2": {
+      "developmentClient": false,
       "distribution": "internal",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "googleServicesFile": "./google-services.dev.json"
       }
     },
-    "production": {
+    "e3": {
+      "developmentClient": false,
+      "distribution": "store",
+      "android": {
+        "buildType": "app-bundle",
+        "googleServicesFile": "./google-services.prod.json"
+      },
       "autoIncrement": true
     }
   },
   "submit": {
-    "production": {}
+    "release": {
+      "android": {
+        "track": "production"
+      }
+    }
   }
 }
