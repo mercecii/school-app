@@ -20,8 +20,14 @@ const firebaseConfigProd = {
   appId: "1:198371863429:web:bd6cb1d9ced76fb8f472ec",
 };
 
-console.log("Firebase config loaded:", __DEV__ ? "Development" : "Production");
-const firebaseConfig = __DEV__ ? firebaseConfigDev : firebaseConfigProd;
+// On native, __DEV__ correctly signals dev vs release builds.
+// On web static exports, __DEV__ is always false, so we also check
+// EXPO_PUBLIC_FIREBASE_ENV to allow build-time environment selection.
+const useDevConfig =
+  __DEV__ || process.env.EXPO_PUBLIC_FIREBASE_ENV === "dev";
+
+console.log("Firebase config loaded:", useDevConfig ? "Development (E2)" : "Production (E3)");
+const firebaseConfig = useDevConfig ? firebaseConfigDev : firebaseConfigProd;
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 

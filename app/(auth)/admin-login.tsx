@@ -5,7 +5,6 @@ import { doc, getDoc } from "firebase/firestore";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -27,17 +26,17 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleAdminLogin = async () => {
     const trimmedEmail = email.trim().toLowerCase();
-    console.log("Attempting admin login with email:", trimmedEmail);
     if (!trimmedEmail || !password) {
-      Alert.alert("Missing details", "Enter email and password.");
-      console.log("Login failed: Missing email or password");
+      setError("Enter email and password.");
       return;
     }
 
     setLoading(true);
+    setError("");
     try {
       const credential = await signInWithEmailAndPassword(
         auth,
@@ -47,10 +46,7 @@ export default function AdminLogin() {
       const uid = credential.user?.uid;
 
       if (!uid) {
-        console.log(
-          "Login failed: No UID returned from signInWithEmailAndPassword",
-        );
-        Alert.alert("Login failed", "Unable to validate admin account.");
+        setError("Unable to validate admin account.");
         await signOut(auth);
         return;
       }
@@ -59,18 +55,18 @@ export default function AdminLogin() {
 
       if (!adminSnap.exists()) {
         await signOut(auth);
-        Alert.alert("Unauthorized access", "You are not an admin user.");
+        setError("You are not an admin user.");
         return;
       }
 
       router.replace("/admin");
-    } catch (error: any) {
-      console.error("Admin login error:", error);
-      const code = String(error?.code ?? "");
-      if (code.includes("auth/invalid-credential")) {
-        Alert.alert("Login failed", "Invalid email or password.");
+    } catch (e: any) {
+      console.error("Admin login error:", e);
+      const code = String(e?.code ?? "");
+      if (code.includes("auth/invalid-credential") || code.includes("auth/wrong-password") || code.includes("auth/user-not-found")) {
+        setError("Invalid email or password.");
       } else {
-        Alert.alert("Login failed", "Unable to sign in. Please try again.");
+        setError("Unable to sign in. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -110,12 +106,18 @@ export default function AdminLogin() {
           editable={!loading}
         />
 
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleAdminLogin}
           disabled={loading}
         >
-          <Text style={styles.buttonText}>Login as Admin</Text>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Login as Admin</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -133,8 +135,6 @@ export default function AdminLogin() {
         >
           <Text style={styles.secondaryText}>Back to Student Login</Text>
         </TouchableOpacity>
-
-        {loading ? <ActivityIndicator style={styles.loader} /> : null}
       </View>
     </KeyboardAvoidingView>
   );
@@ -183,6 +183,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     backgroundColor: "#fafafa",
   },
+  errorText: {
+    color: "#dc2626",
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: "center",
+  },
   button: {
     width: "100%",
     backgroundColor: PRIMARY,
@@ -207,8 +213,5 @@ const styles = StyleSheet.create({
     color: PRIMARY,
     fontSize: 14,
     fontWeight: "600",
-  },
-  loader: {
-    marginTop: 12,
   },
 });
