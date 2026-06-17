@@ -3,6 +3,7 @@ import type { User as WebUser } from "firebase/auth";
 import {
   getAuth,
   onAuthStateChanged as webOnAuthStateChanged,
+  sendPasswordResetEmail as webSendPasswordResetEmail,
   signInWithEmailAndPassword as webSignInWithEmailAndPassword,
   signOut as webSignOut,
 } from "firebase/auth";
@@ -48,4 +49,11 @@ export async function signInWithEmailAndPassword(
 
 export async function signOut(currentAuth: AuthClient): Promise<void> {
   await webSignOut(currentAuth as BrowserAuth);
+}
+
+export async function sendPasswordResetEmail(
+  currentAuth: AuthClient,
+  email: string,
+): Promise<void> {
+  await webSendPasswordResetEmail(currentAuth as BrowserAuth, email);
 }

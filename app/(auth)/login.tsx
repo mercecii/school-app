@@ -1,6 +1,4 @@
 import { defaultBranding } from "@/config/branding";
-import { ensureStudentDocUsesUid } from "@/utils/studentLinking";
-import { registerForPushNotificationsAsync } from "@/utils/utils";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -102,29 +100,10 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const userCredential = await confirmationResult.confirm(trimmed);
-      if (!userCredential) {
-        Alert.alert("Login failed", "Please try again.");
-        return;
-      }
-      const user = userCredential.user;
-      if (!user) {
-        Alert.alert("Login failed", "Please try again.");
-        return;
-      }
-
-      const studentData = await ensureStudentDocUsesUid(user);
-
-      if (!studentData) {
-        // `AuthGate` already renders the account-not-activated UI for
-        // signed-in users who do not have a linked student record.
-        // Avoid a manual `replace()` here because it can race with the auth
-        // state update and trigger the unhandled navigator warning.
-        return;
-      }
-
-      await registerForPushNotificationsAsync(user.uid);
-      router.replace("/pages");
+      await confirmationResult.confirm(trimmed);
+      // AuthGate's onAuthStateChanged fires from here, runs ensureStudentDocUsesUid,
+      // registers push token, sets Redux state, and redirects to /pages (or shows
+      // NotRegisteredScreen). No need to duplicate that work here.
     } catch (e: any) {
       console.error("OTP verify error:", e);
       console.error("Error code:", e.code);

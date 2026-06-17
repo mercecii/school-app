@@ -23,6 +23,10 @@ type AuthModule = {
     password: string,
   ) => Promise<AuthUserCredential>;
   signOut: (currentAuth: AuthClient) => Promise<void>;
+  sendPasswordResetEmail: (
+    currentAuth: AuthClient,
+    email: string,
+  ) => Promise<void>;
 };
 
 const authModule: AuthModule =
@@ -38,6 +42,7 @@ export const {
   signInWithPhoneNumber,
   signInWithEmailAndPassword,
   signOut,
+  sendPasswordResetEmail,
 } = authModule;
 
 export type {

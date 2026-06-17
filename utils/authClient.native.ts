@@ -2,6 +2,7 @@ import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import {
   getAuth,
   onAuthStateChanged as nativeOnAuthStateChanged,
+  sendPasswordResetEmail as nativeSendPasswordResetEmail,
   signInWithEmailAndPassword as nativeSignInWithEmailAndPassword,
   signInWithPhoneNumber as nativeSignInWithPhoneNumber,
   signOut as nativeSignOut,
@@ -61,4 +62,11 @@ export async function signInWithEmailAndPassword(
 
 export async function signOut(currentAuth: AuthClient): Promise<void> {
   await nativeSignOut(currentAuth as NativeAuth);
+}
+
+export async function sendPasswordResetEmail(
+  currentAuth: AuthClient,
+  email: string,
+): Promise<void> {
+  await nativeSendPasswordResetEmail(currentAuth as NativeAuth, email);
 }

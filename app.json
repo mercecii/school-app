@@ -12,10 +12,6 @@
       "translucent": false,
       "backgroundColor": "#ffffff"
     },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.mercecii.schoolapp"
-    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
