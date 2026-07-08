@@ -7,6 +7,9 @@
     "e2": {
       "developmentClient": false,
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "staging"
+      },
       "android": {
         "buildType": "apk",
         "googleServicesFile": "./google-services.dev.json"
@@ -15,6 +18,9 @@
     "e3": {
       "developmentClient": false,
       "distribution": "store",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production"
+      },
       "android": {
         "buildType": "app-bundle",
         "googleServicesFile": "./google-services.prod.json"

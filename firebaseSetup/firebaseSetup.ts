@@ -20,14 +20,35 @@ const firebaseConfigProd = {
   appId: "1:198371863429:web:bd6cb1d9ced76fb8f472ec",
 };
 
-// On native, __DEV__ correctly signals dev vs release builds.
-// On web static exports, __DEV__ is always false, so we also check
-// EXPO_PUBLIC_FIREBASE_ENV to allow build-time environment selection.
-const useDevConfig =
-  __DEV__ || process.env.EXPO_PUBLIC_FIREBASE_ENV === "dev";
+// __DEV__ only reflects "running under Metro" — it's false in every
+// standalone build (EAS internal or store alike), so it's only a valid
+// fallback for local dev. Every built app must set EXPO_PUBLIC_APP_ENV
+// explicitly; we never silently fall back to production.
+const APP_ENV =
+  process.env.EXPO_PUBLIC_APP_ENV ?? (__DEV__ ? "development" : undefined);
 
-console.log("Firebase config loaded:", useDevConfig ? "Development (E2)" : "Production (E3)");
-const firebaseConfig = useDevConfig ? firebaseConfigDev : firebaseConfigProd;
+if (!APP_ENV) {
+  throw new Error(
+    "EXPO_PUBLIC_APP_ENV is not set — refusing to guess which Firebase project to use."
+  );
+}
+
+type FirebaseWebConfig = Omit<typeof firebaseConfigDev, "measurementId"> & {
+  measurementId?: string;
+};
+
+const configsByEnv: Record<string, FirebaseWebConfig> = {
+  development: firebaseConfigDev,
+  staging: firebaseConfigDev,
+  production: firebaseConfigProd,
+};
+
+const firebaseConfig = configsByEnv[APP_ENV];
+if (!firebaseConfig) {
+  throw new Error(`Unknown EXPO_PUBLIC_APP_ENV: "${APP_ENV}"`);
+}
+
+console.log(`Firebase config loaded: ${APP_ENV} (${firebaseConfig.projectId})`);
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
