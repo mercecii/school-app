@@ -1,0 +1,28 @@
+{
+  "projectId": "c3a75d79-1b6a-4928-a501-edfced1276c9",
+  "pkg": "school-app",
+  "globalName": "SchoolApp",
+  "shape": "package",
+  "entry": "./.design-sync/entry.mjs",
+  "buildCmd": "node .design-sync/prebuild/build.mjs",
+  "componentSrcMap": {
+    "HeaderRight": "components/HeaderRight.tsx",
+    "NotRegisteredScreen": "components/NotRegisteredScreen.tsx",
+    "CustomHeader": "components/CustomHeader.tsx"
+  },
+  "dtsPropsFor": {
+    "HeaderRight": "tintColor?: string;\n  pressColor?: string;\n  pressOpacity?: number;\n  canGoBack: boolean;",
+    "NotRegisteredScreen": "",
+    "CustomHeader": "children?: string;"
+  },
+  "extraEntries": ["./.design-sync/prebuild/previewSupport.mjs"],
+  "provider": {
+    "component": "Provider",
+    "props": { "store": { "$ref": "previewStore" } }
+  },
+  "extraFonts": ["./.design-sync/prebuild/fonts/icons.css"],
+  "readmeHeader": ".design-sync/conventions.md",
+  "libOverrides": {
+    "story-imports.mjs": "seed `exported` from componentSrcMap — cfg.entry (needed for default-export re-exporting) leaves package-build.mjs's synthEntry-gated back-fill unreached, so preview imports of the real component source never shim to window.SchoolApp and esbuild tries to parse real react-native"
+  }
+}
