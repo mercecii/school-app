@@ -38,8 +38,14 @@ Running record of non-obvious architectural/process decisions and the reasoning 
 - **Rules deploys stay a manual, human-reviewed command** (`deploy-rules-dev` / `deploy-rules-prod`, mirroring the existing `functions` deploy scripts) — not wired into the auto-deploy CI workflows.
   **Why:** security rules are high-blast-radius; auto-deploying them on every push removes the review step that matters most for this particular file.
 
+- **`app.json` replaced entirely by `app.config.ts`**, function-based, keyed off `EXPO_PUBLIC_APP_ENV`. Verified via `npx expo config --json` under all three env values plus unset: production resolves byte-for-byte identical to the old `app.json` (name, package, icon background all unchanged); staging/development get distinct names (`KPS (Staging)` / `KPS (Dev)`) and adaptive-icon background tints (no new icon artwork this pass — cheapest visual differentiator); unset defaults to `development`, never production.
+  **Why byte-for-byte for prod:** the existing Play Store listing and installed base must be completely undisturbed by this migration.
+
+- **Landed the package-id split immediately, accepting that it breaks `yarn build-e2` until the Firebase Console prerequisite is done** — `eas.json`'s `e2` profile now points at `google-services.staging.json`, which doesn't exist yet.
+  **Why:** user chose "land it now" over staging the rollout behind the old package id — zero users means no build-cadence pressure, and one clear blocking TODO beats a two-step migration with a silent intermediate state.
+
 ### Still open (as of this entry)
 - User to create the `production` GitHub Environment (Settings → Environments) with a required reviewer — referenced by `firebase-hosting-merge.yml` but not yet configured with an actual approval gate.
-- User to register the two new Android apps in Firebase Console and hand over the resulting `google-services.dev.json` / `google-services.staging.json`.
-- `app.json` → `app.config.ts` conversion (code side of the package-id split) — not yet written.
+- **`yarn build-e2` is currently broken** — user needs to register the two new Android apps in Firebase Console (`com.mercecii.schoolapp.dev`, `com.mercecii.schoolapp.staging`, both under `ssr-juniors-dev`) and hand over the resulting `google-services.dev.json` / `google-services.staging.json` before E2 builds work again.
 - User to pull current Firestore rules (`firebase firestore:rules:get` or console copy) for both projects.
+- `develop-with-claude` has been pushed to origin but not yet merged into `develop` — the new staging auto-deploy pipeline hasn't been exercised end-to-end yet.
