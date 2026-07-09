@@ -8,10 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Install dependencies
 yarn install
 
-# Start local dev server (hits E2/QA Firebase via __DEV__=true)
+# Start local dev server (development env — .env.development sets EXPO_PUBLIC_APP_ENV=development)
 yarn start-dev
 
-# Run on Android device/emulator (local native build)
+# Run on Android device/emulator (local native build, development env)
 yarn android
 
 # Run as web app
@@ -20,7 +20,7 @@ yarn web
 # Lint
 yarn lint
 
-# Build E2 (QA) APK — uses google-services.dev.json, distributed internally
+# Build E2 (staging/QA) APK — uses google-services.staging.json, package com.mercecii.schoolapp.staging
 yarn build-e2
 
 # Build E3 (production) AAB — uses google-services.prod.json, for Play Store
@@ -32,6 +32,21 @@ yarn release
 
 There is no test suite configured. TypeScript type-checking is the primary static check, done implicitly by the Expo toolchain.
 
+## Environments (development / staging / production)
+
+Three environments, driven by one explicit env var — never inferred from `__DEV__` in a built app (that only means "running under Metro," and is `false` in every standalone build including E2). See `docs/decisions.md` for the full rationale and running decision log; this is the load-bearing summary.
+
+| Environment | `EXPO_PUBLIC_APP_ENV` | Firebase project | Android `applicationId` | Deploys on |
+|---|---|---|---|---|
+| Development | `development` | `ssr-juniors-dev` | `com.mercecii.schoolapp.dev` | local only |
+| Staging / QA (E2) | `staging` | `ssr-juniors-dev` | `com.mercecii.schoolapp.staging` | push → `develop` |
+| Production (E3) | `production` | `ssr-juniors` | `com.mercecii.schoolapp` | push → `main`, reviewer-gated |
+
+- `EXPO_PUBLIC_APP_ENV` is set via `.env.development` / `.env.production` (committed, no secrets — loaded automatically by Expo based on the command), overridden explicitly per `eas.json` build profile (`e2`→`staging`, `e3`→`production`), and set explicitly in each GitHub Actions workflow's build step `env:` block.
+- `firebaseSetup/firebaseSetup.ts` reads it and **throws at startup if it's unset in a built (non-Metro) context** — it never silently falls back to production.
+- `app.config.ts` (replaces the old static `app.json`) reads the same var to compute `android.package`, the app name, and the adaptive-icon tint per environment — production resolves byte-for-byte identical to the pre-migration `app.json`.
+- `main` and `develop` are both real, pushed branches — `develop` is the trunk (GitHub's default branch), `main` is the protected production branch gated by a GitHub Environment (`production`) with a required reviewer.
+
 ## Platforms
 
 Android and Web only. iOS support has been dropped. The dual Firebase SDK abstraction (`authClient.native` / `authClient.web`) covers both remaining platforms.
@@ -40,7 +55,7 @@ Android and Web only. iOS support has been dropped. The dual Firebase SDK abstra
 
 ### Dual Firebase SDK
 
-The app targets three platforms (Android, iOS, web). Native builds use `@react-native-firebase/*` (the React Native Firebase SDK); the web build uses the `firebase` JS SDK. This incompatibility is resolved via platform-specific files:
+Native builds use `@react-native-firebase/*` (the React Native Firebase SDK); the web build uses the `firebase` JS SDK. This incompatibility is resolved via platform-specific files:
 
 - `utils/authClient.native.ts` — wraps `@react-native-firebase/auth`
 - `utils/authClient.web.ts` — wraps `firebase/auth`
@@ -49,7 +64,7 @@ The app targets three platforms (Android, iOS, web). Native builds use `@react-n
 
 All auth calls elsewhere import from `@/utils/authClient` and go through these typed wrappers. Phone number login is only supported on native (the web client throws on `signInWithPhoneNumber`).
 
-Firebase is initialized in `firebaseSetup/firebaseSetup.ts`, which selects dev or prod config based on `__DEV__`. Firestore is exported from there and used directly throughout the app.
+Firebase is initialized in `firebaseSetup/firebaseSetup.ts`. Unlike `authClient`, this file has **no native/web split** — the same `firebase/app` + `firebase/firestore` JS SDK client is used for Firestore access on every platform, including native Android. It selects dev vs prod config based on `EXPO_PUBLIC_APP_ENV` (see Environments above) — historically this was based on `__DEV__`, which caused every built Android app to silently read/write Firestore against production regardless of which environment its native Auth was scoped to; see `docs/decisions.md` for the full incident writeup.
 
 ### Role-Based Routing
 

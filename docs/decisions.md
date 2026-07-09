@@ -44,8 +44,17 @@ Running record of non-obvious architectural/process decisions and the reasoning 
 - **Landed the package-id split immediately, accepting that it breaks `yarn build-e2` until the Firebase Console prerequisite is done** — `eas.json`'s `e2` profile now points at `google-services.staging.json`, which doesn't exist yet.
   **Why:** user chose "land it now" over staging the rollout behind the old package id — zero users means no build-cadence pressure, and one clear blocking TODO beats a two-step migration with a silent intermediate state.
 
+- **`production` GitHub Environment reviewer gate: created via UI, but the required-reviewer rule silently didn't save** (`gh api repos/mercecii/school-app/environments` showed `protection_rules: []` after the user believed it was configured). Fixed via `gh api -X PUT .../environments/production` with `reviewers: [{type: User, id: 14855460}]` (mercecii), then re-verified via the same GET — confirmed `required_reviewers` now present.
+  **Why this matters:** a UI step that looks complete isn't the same as a verified one — always check state via API/CLI after a manual console step where feasible, rather than trusting "I did it" at face value. This is now the second console step (after the branch-topology surprise) that didn't match what was assumed.
+
+- **`com.mercecii.schoolapp.dev` registered in Firebase Console**, `google-services.dev.json` updated with the real two-entry file (old `com.mercecii.schoolapp` + new `.dev`). `com.mercecii.schoolapp.staging` still not registered — `yarn build-e2` remains broken.
+
 ### Still open (as of this entry)
-- User to create the `production` GitHub Environment (Settings → Environments) with a required reviewer — referenced by `firebase-hosting-merge.yml` but not yet configured with an actual approval gate.
-- **`yarn build-e2` is currently broken** — user needs to register the two new Android apps in Firebase Console (`com.mercecii.schoolapp.dev`, `com.mercecii.schoolapp.staging`, both under `ssr-juniors-dev`) and hand over the resulting `google-services.dev.json` / `google-services.staging.json` before E2 builds work again.
-- User to pull current Firestore rules (`firebase firestore:rules:get` or console copy) for both projects.
-- `develop-with-claude` has been pushed to origin but not yet merged into `develop` — the new staging auto-deploy pipeline hasn't been exercised end-to-end yet.
+- User to register `com.mercecii.schoolapp.staging` in Firebase Console (under `ssr-juniors-dev`) and hand over the resulting `google-services.staging.json` — **`yarn build-e2` is broken until this lands**.
+- User to paste current Firestore rules (console copy — the CLI has no "get deployed rules" command in the installed version, and pulling via a raw `gcloud`/OAuth access token was intentionally avoided, see credentials stance below) for both `ssr-juniors-dev` and `ssr-juniors`.
+- `develop-with-claude` has been pushed to origin but not yet merged into `develop` — the new staging auto-deploy pipeline hasn't been exercised end-to-end yet. User will merge after review.
+- Vestigial `google-services.json` (bare, unused by `app.config.ts` now) to be deleted in a later cleanup pass — intentionally left alone for now per user request.
+
+### Tooling notes
+- `gh` CLI was not installed at the start of this work; installed partway through, which unblocked direct GitHub API verification/fixes (see reviewer-gate fix above).
+- `firebase` CLI is installed and already authenticated on this machine (confirmed via `firebase projects:list`, shows both `ssr-juniors` and `ssr-juniors-dev`) — useful for future scripted Firebase operations, but it has no built-in command to fetch currently-deployed Firestore rules; that still requires the console.
