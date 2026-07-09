@@ -51,10 +51,14 @@ Running record of non-obvious architectural/process decisions and the reasoning 
 
 - **`com.mercecii.schoolapp.staging` registered too — done via Claude Cowork** (a separate browser-capable agent the user runs, briefed via `CLAUDE_COWORK.md`), not manually. `google-services.staging.json` added with all three client entries (original, `.dev`, `.staging`), verified package name matches what `app.config.ts`/`eas.json`'s `e2` profile expect. **`yarn build-e2` is unblocked.**
 
+- **Firestore rules pulled from console via Claude Cowork, checked into the repo as `firestore.dev.rules` (covers `ssr-juniors-dev`, i.e. local dev + staging) and `firestore.prod.rules` (covers `ssr-juniors`).** Console copy, not hand-written — matches ground truth as of 2026-07-09. Neither project had any composite (Manual) indexes deployed.
+  **Notable drift found between the two:** prod's rules are looser than dev/staging's — no subcollection deny-all under `/students/{studentId}`, no admin-full-access clause on `/students`, and `/notifications` write logic differs (dev/staging: blanket `allow write: if false`; prod: split `create`/`update`/`delete` with real admin/student-authored logic on `update`). Not yet reconciled — flagged for follow-up, not fixed here.
+  **Not yet wired up:** `firebase.json` has no `firestore.rules` field yet, `.firebaserc` only has a `default` alias (`ssr-juniors`, no `ssr-juniors-dev` alias), and the planned `deploy-rules-dev`/`deploy-rules-prod` package.json scripts don't exist yet. Rules files are checked in but not yet deployable via a single command.
+
 ### Still open (as of this entry)
-- User to paste current Firestore rules (console copy — the CLI has no "get deployed rules" command in the installed version, and pulling via a raw `gcloud`/OAuth access token was intentionally avoided, see credentials stance below) for both `ssr-juniors-dev` and `ssr-juniors`. Also briefed to Claude Cowork via `CLAUDE_COWORK.md`.
 - `develop-with-claude` has been pushed to origin but not yet merged into `develop` — the new staging auto-deploy pipeline hasn't been exercised end-to-end yet. User will merge after review.
 - Vestigial `google-services.json` (bare, unused by `app.config.ts` now) to be deleted in a later cleanup pass — intentionally left alone for now per user request.
+- `firestore.dev.rules` / `firestore.prod.rules` are checked in but not wired to `firebase.json` or a deploy command yet, and the dev/prod rules drift noted above hasn't been reconciled.
 
 ### Tooling notes
 - `gh` CLI was not installed at the start of this work; installed partway through, which unblocked direct GitHub API verification/fixes (see reviewer-gate fix above).

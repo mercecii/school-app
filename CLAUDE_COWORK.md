@@ -1,39 +1,21 @@
 # Browser tasks for Claude Cowork
 
-This file is a self-contained task list for browser/console work this repo currently needs. It assumes no prior context — everything you need is below. When done, report results back to the user (Deepak) so they can hand them to the coding assistant working in this repo.
+**This is a living document, not a one-time brief.** Deepak runs Claude Code (VS Code) and Claude Cowork (browser) against this same repo, and there's no automatic sync between the two — the repo itself is the sync point. Convention:
 
-Background in one paragraph: this app (`school-app`) is mid-migration to a proper dev/staging/production environment setup. Two Firebase projects exist — `ssr-juniors-dev` (used for both local development and staging/QA) and `ssr-juniors` (production). Each environment is getting its own Android app identity so builds don't collide on a test device. One of the two new Android app registrations is already done; the other, plus pulling the currently-deployed Firestore security rules, are still open. Full rationale, if you want it: `docs/decisions.md` in this repo.
+- **This file always lists the current outstanding browser/console tasks.** When you finish one, it should get cleared or replaced by whoever updates this file next — don't leave completed tasks listed as pending.
+- **`docs/decisions.md`** is the running decision log both sides read and write to. If you find something noteworthy while doing a task (a security issue, an inconsistency, an unexpected console state), add it there under a new dated entry or append to the current one — don't just report it back verbally and let it evaporate. That's exactly how the admin-rules vulnerability below got caught: it was logged there, not just mentioned in chat.
+- Read `docs/decisions.md` before starting anything here if you want fuller context than this file gives.
 
----
-
-## Task 1: Register the staging Android app in Firebase
-
-Go to **https://console.firebase.google.com/project/ssr-juniors-dev/settings/general**
-
-Under "Your apps", you should already see two Android apps registered: `com.mercecii.schoolapp` and `com.mercecii.schoolapp.dev`. Add a third:
-
-1. Click **"Add app"** → the Android icon
-2. **Android package name**: `com.mercecii.schoolapp.staging`
-3. **App nickname**: `KPS Staging`
-4. Leave the SHA-1 field blank
-5. Click **Register app**, then download the `google-services.json` it offers
-6. Click through the remaining SDK-setup steps (no code changes needed) until "Continue to console"
-
-**Report back:** the full contents of the downloaded `google-services.json` (paste as text, or hand over the file). It will contain three app entries (the original, `.dev`, and `.staging`) — that's expected, Firebase bundles every app under a project into one file.
-
-## Task 2: Copy the currently-deployed Firestore security rules
-
-For **both** Firebase projects, open the Rules tab and copy the full text shown in the editor:
-
-- **`ssr-juniors-dev`** (dev/staging data): https://console.firebase.google.com/project/ssr-juniors-dev/firestore/rules
-- **`ssr-juniors`** (production data): https://console.firebase.google.com/project/ssr-juniors/firestore/rules
-
-Select all the text in each rules editor and copy it.
-
-**Report back:** both blocks of rules text, clearly labeled by project (`ssr-juniors-dev` vs `ssr-juniors`). Also check the **Indexes** tab (same left sidebar) on each project and note whether any composite indexes exist, or if the list is empty.
+Background: this app (`school-app`) is mid-migration to a proper dev/staging/production environment setup, driven from Claude Code / VS Code. Two Firebase projects: `ssr-juniors-dev` (dev + staging/QA) and `ssr-juniors` (production).
 
 ---
 
-## When you're done
+## Current status: no browser tasks pending
 
-Hand both results (the `google-services.json` content from Task 1, and the two rules texts from Task 2) back to Deepak, who will pass them to the coding assistant to wire in. Nothing here requires touching this repo's code or git — it's read-only console work plus two downloads/copies.
+Both previously-listed tasks are done:
+- ✅ `com.mercecii.schoolapp.dev` and `com.mercecii.schoolapp.staging` registered as Android apps under `ssr-juniors-dev`; `google-services.dev.json` / `google-services.staging.json` are in the repo.
+- ✅ Firestore rules pulled from both projects' consoles → `firestore.dev.rules` / `firestore.prod.rules` in the repo root.
+
+**Heads up if you're picking this up next:** that rules pull surfaced a real security bug — production's rules currently let any signed-in user grant themselves the admin role (`/admins/{adminId}` allows `write` if `request.auth.uid == adminId`, with no check that the writer is already an admin). Claude Code is drafting a fix; this doesn't need browser/console work to fix (it's a rules-file edit), but **deploying** the corrected rules to the live `ssr-juniors` project, when that's ready, will need someone to run `firebase deploy --only firestore:rules --project ssr-juniors` — that could be a future task listed here.
+
+Nothing else needed from Cowork right now. Check back here before starting anything new.
