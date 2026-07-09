@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // ADMINS — only an existing admin can create or modify admin docs.
+    // Admin accounts are seeded manually (console / privileged backend),
+    // never self-registered through the app.
+    match /admins/{adminId} {
+      allow read: if isOwner(adminId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // STUDENTS
+    match /students/{studentId} {
+      allow read, write: if isOwner(studentId) || isAdmin();
+
+      // Push token registration (utils/pushTokenManager.ts writes here
+      // directly from the client via the firebase JS SDK).
+      match /devices/{deviceId} {
+        allow read, write: if isOwner(studentId) || isAdmin();
+      }
+
+      // Deny any other subcollection by default.
+      match /{subCollection}/{doc} {
+        allow read, write: if false;
+      }
+    }
+
+    // NOTIFICATIONS
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn();
+      allow create: if isAdmin();
+      // Admins can edit any field. Non-admin signed-in users may only
+      // append themselves to readBy (AuthGate does readBy: arrayUnion(uid)
+      // on notification tap) — not edit title/body/other fields.
+      allow update: if isAdmin() ||
+        (isSignedIn() &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(["readBy"]));
+      allow delete: if false;
+    }
+  }
+}
