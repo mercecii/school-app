@@ -6,6 +6,11 @@ import { firestore } from "../firebaseSetup/firebaseSetup";
 
 const DEVICE_ID_STORAGE_KEY = "@school_app_device_id";
 
+// Push tokens live under the three login-holding roles only — students
+// never authenticate in v1, so they never had a devices subcollection to
+// begin with (see docs/decisions.md).
+export type PushTokenCollection = "admins" | "teachers" | "parents";
+
 /**
  * Generate or retrieve a stable deviceId.
  * Android uses hardware-backed androidId; other platforms persist a fallback id.
@@ -29,10 +34,11 @@ export const getOrCreateDeviceId = async (): Promise<string> => {
 };
 
 /**
- * Save push token for current device at students/{uid}/devices/{deviceId}
+ * Save push token for current device at {collectionName}/{docId}/devices/{deviceId}
  */
 export const savePushToken = async (
-  uid: string,
+  collectionName: PushTokenCollection,
+  docId: string,
   token: string,
 ): Promise<void> => {
   try {
@@ -40,7 +46,7 @@ export const savePushToken = async (
     console.log("📱 Device ID:", deviceId);
     console.log("📡 Writing token...");
 
-    await setDoc(doc(firestore, "students", uid, "devices", deviceId), {
+    await setDoc(doc(firestore, collectionName, docId, "devices", deviceId), {
       token,
       platform: Platform.OS,
       updatedAt: serverTimestamp(),
@@ -57,11 +63,12 @@ export const savePushToken = async (
  * Remove push token document for a device.
  */
 export const removePushToken = async (
-  uid: string,
+  collectionName: PushTokenCollection,
+  docId: string,
   deviceId: string,
 ): Promise<void> => {
   try {
-    const deviceRef = doc(firestore, "students", uid, "devices", deviceId);
+    const deviceRef = doc(firestore, collectionName, docId, "devices", deviceId);
     await deleteDoc(deviceRef);
   } catch (error) {
     console.error("Error removing push token:", error);

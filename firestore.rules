@@ -1,6 +1,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // ── Core helpers ──────────────────────────────────────────────────
     function isSignedIn() {
       return request.auth != null;
     }
@@ -11,40 +12,212 @@ service cloud.firestore {
       return isSignedIn() &&
         exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
+    // Phone-adopt pattern for teachers/parents: before first login there is
+    // no authUid to key by, so the self-serve lookup/adopt step is
+    // authorized via the verified phone_number claim Firebase Phone Auth
+    // puts on the ID token, matched against the doc's `phone` field.
+    function isPhoneOwner(phone) {
+      return isSignedIn() && request.auth.token.phone_number == phone;
+    }
 
-    // ADMINS — only an existing admin can create or modify admin docs.
-    // Admin accounts are seeded manually (console / privileged backend),
-    // never self-registered through the app.
+    // authz/{uid} resolution — restores "who is calling" for auto-ID
+    // teachers/parents docs, which lost UID-keying. Never client-writable;
+    // maintained server-side (Cloud Function) off teacher/parent doc
+    // writes, mirroring the existing admin self-promotion fix.
+    function hasAuthz() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/authz/$(request.auth.uid));
+    }
+    function authzDoc() {
+      return get(/databases/$(database)/documents/authz/$(request.auth.uid)).data;
+    }
+    function isTeacher() {
+      return hasAuthz() && authzDoc().role == "teacher";
+    }
+    function myProfileId() {
+      return authzDoc().profileId;
+    }
+    function myClassIds() {
+      return authzDoc().classIds;
+    }
+    // Class-wide connection (teacher assigned to it, or parent with any
+    // child in it) — right for class-wide content like notifications.
+    // NOT right for per-child data (attendance, fees) — those must check
+    // the specific student's parentUids instead, see below.
+    function isConnectedToClass(classId) {
+      return hasAuthz() && classId in myClassIds();
+    }
+    function isParentOfStudent(studentId) {
+      return isSignedIn() &&
+        request.auth.uid in get(/databases/$(database)/documents/students/$(studentId)).data.parentUids;
+    }
+
+    // ── ADMINS ───────────────────────────────────────────────────────
+    // UID-keyed. Seeded manually (console / privileged backend), never
+    // self-registered through the app.
     match /admins/{adminId} {
       allow read: if isOwner(adminId) || isAdmin();
       allow write: if isAdmin();
-    }
 
-    // STUDENTS
-    match /students/{studentId} {
-      allow read, write: if isOwner(studentId) || isAdmin();
-
-      // Push token registration (utils/pushTokenManager.ts writes here
-      // directly from the client via the firebase JS SDK).
       match /devices/{deviceId} {
-        allow read, write: if isOwner(studentId) || isAdmin();
+        allow read, write: if isOwner(adminId) || isAdmin();
       }
-
-      // Deny any other subcollection by default.
       match /{subCollection}/{doc} {
         allow read, write: if false;
       }
     }
 
-    // NOTIFICATIONS
-    match /notifications/{notificationId} {
-      allow read: if isSignedIn();
+    // ── TEACHERS ─────────────────────────────────────────────────────
+    // Auto-ID, phone-adopted like parents. Admin owns profile fields;
+    // teacher can only self-adopt (set authUid/lastLoginAt on first login).
+    match /teachers/{teacherId} {
+      // resource.data.authUid == request.auth.uid mirrors the "subsequent
+      // login" query in findByAuthUid (where authUid == uid) — required
+      // because a list rule can only rely on resource.data if the branch
+      // matches the query's own filter exactly (see docs/decisions.md:136).
+      // Without this, every non-first login hit permission-denied.
+      allow read: if isAdmin() || isPhoneOwner(resource.data.phone) ||
+        resource.data.authUid == request.auth.uid;
       allow create: if isAdmin();
-      // Admins can edit any field. Non-admin signed-in users may only
-      // append themselves to readBy (AuthGate does readBy: arrayUnion(uid)
-      // on notification tap) — not edit title/body/other fields.
       allow update: if isAdmin() ||
-        (isSignedIn() &&
+        (isPhoneOwner(resource.data.phone) &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(["authUid", "lastLoginAt", "updatedAt"]) &&
+          request.resource.data.authUid == request.auth.uid);
+      allow delete: if isAdmin();
+
+      match /devices/{deviceId} {
+        allow read, write: if isAdmin() ||
+          isPhoneOwner(get(/databases/$(database)/documents/teachers/$(teacherId)).data.phone);
+      }
+      match /{subCollection}/{doc} {
+        allow read, write: if false;
+      }
+    }
+
+    // ── PARENTS ──────────────────────────────────────────────────────
+    match /parents/{parentId} {
+      // See matching comment on /teachers — same subsequent-login query.
+      allow read: if isAdmin() || isPhoneOwner(resource.data.phone) ||
+        resource.data.authUid == request.auth.uid;
+      allow create: if isAdmin();
+      allow update: if isAdmin() ||
+        (isPhoneOwner(resource.data.phone) &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(["authUid", "lastLoginAt", "updatedAt"]) &&
+          request.resource.data.authUid == request.auth.uid);
+      allow delete: if isAdmin();
+
+      match /devices/{deviceId} {
+        allow read, write: if isAdmin() ||
+          isPhoneOwner(get(/databases/$(database)/documents/parents/$(parentId)).data.phone);
+      }
+      match /{subCollection}/{doc} {
+        allow read, write: if false;
+      }
+    }
+
+    // ── STUDENTS ─────────────────────────────────────────────────────
+    // Auto-ID, admin-created, never an auth identity. parentUids holds
+    // auth UIDs (not parent doc IDs) so this check needs no extra hop.
+    match /students/{studentId} {
+      allow read: if isAdmin() ||
+        (isTeacher() && resource.data.classId in myClassIds()) ||
+        (request.auth.uid in resource.data.parentUids);
+      allow write: if isAdmin();
+
+      match /feePayments/{paymentId} {
+        allow read: if isAdmin() || isParentOfStudent(studentId);
+        allow write: if isAdmin();
+      }
+      match /{subCollection}/{doc} {
+        allow read, write: if false;
+      }
+    }
+
+    // ── CLASSES ──────────────────────────────────────────────────────
+    // Low-sensitivity roster metadata (name/grade/section/classTeacherUid)
+    // — broad signed-in read keeps rules simple without a privacy cost.
+    match /classes/{classId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ── ATTENDANCE ───────────────────────────────────────────────────
+    // Per-student, per-day docs (see docs/decisions.md — a per-class map
+    // doc would leak every classmate's status to any authorized reader).
+    // Deferred decision resolved here as "any teacher assigned to the
+    // class" — tighten to classTeacherUid-only later if homeroom-only
+    // marking is required.
+    //
+    // Deliberately NOT using isConnectedToClass() here: that helper is
+    // true for both teachers AND parents (parent authz.classIds is
+    // derived from their children's classes), which would let a parent
+    // read every classmate's attendance via class-wide connection instead
+    // of their own child specifically — caught by the emulator round-trip
+    // test in scripts/emulator-round-trip-test.js, which is exactly the
+    // privacy bug the per-student-doc design exists to prevent.
+    match /attendance/{attendanceId} {
+      allow read: if isAdmin() ||
+        (isTeacher() && resource.data.classId in myClassIds()) ||
+        isParentOfStudent(resource.data.studentId);
+      allow create: if isAdmin() ||
+        (isTeacher() &&
+          request.resource.data.classId in myClassIds() &&
+          request.resource.data.markedBy == request.auth.uid &&
+          get(/databases/$(database)/documents/students/$(request.resource.data.studentId)).data.classId == request.resource.data.classId);
+      allow update: if isAdmin() ||
+        (isTeacher() && resource.data.classId in myClassIds() &&
+          request.resource.data.classId == resource.data.classId &&
+          request.resource.data.studentId == resource.data.studentId);
+      // No delete for teachers — corrections go through update, not delete.
+      allow delete: if isAdmin();
+    }
+
+    // ── FEE STRUCTURES ───────────────────────────────────────────────
+    match /feeStructures/{feeStructureId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ── AUTHZ ────────────────────────────────────────────────────────
+    // Never client-writable — same principle as the admin self-promotion
+    // fix. Maintained server-side only (Cloud Function on teacher/parent
+    // doc writes); this rule documents that intent even though the Admin
+    // SDK bypasses rules regardless.
+    match /authz/{uid} {
+      allow read: if isAdmin() || isOwner(uid);
+      allow write: if false;
+    }
+
+    // ── NOTIFICATIONS ────────────────────────────────────────────────
+    // Flat collection with targeting, not fanned out per recipient.
+    // targetValue is null for "school", a classId for "class", or the
+    // recipient's role-doc profileId (not an auth UID) for "individual".
+    match /notifications/{notificationId} {
+      allow read: if isAdmin() ||
+        (resource.data.targetType == "school" && isSignedIn()) ||
+        (resource.data.targetType == "class" && isConnectedToClass(resource.data.targetValue)) ||
+        (resource.data.targetType == "individual" && hasAuthz() && myProfileId() == resource.data.targetValue);
+
+      allow create: if request.resource.data.createdBy == request.auth.uid &&
+        (isAdmin() ||
+          (isTeacher() &&
+            request.resource.data.createdByRole == "teacher" &&
+            request.resource.data.targetType == "class" &&
+            request.resource.data.targetValue in myClassIds()));
+
+      // Admins can edit any field. Non-admin signed-in users who can see
+      // this notification may only append themselves to readBy — write
+      // rules don't inherit read scoping, so the same targeting predicate
+      // is repeated here to prevent a blind arrayUnion from an unrelated
+      // user.
+      allow update: if isAdmin() ||
+        ((
+          (resource.data.targetType == "school" && isSignedIn()) ||
+          (resource.data.targetType == "class" && isConnectedToClass(resource.data.targetValue)) ||
+          (resource.data.targetType == "individual" && hasAuthz() && myProfileId() == resource.data.targetValue)
+        ) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(["readBy"]));
       allow delete: if false;
     }

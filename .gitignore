@@ -46,6 +46,12 @@ app-example
 # firebase ccache
 .firebase
 
+# firebase emulator debug logs
+firestore-debug.log
+firebase-debug.*.log
+ui-debug.log
+pubsub-debug.log
+
 #keystore
 android/app/keystore/*
 *.keystore

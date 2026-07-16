@@ -1,6 +1,7 @@
 import SelectField from "@/components/SelectField";
-import { StudentDoc } from "@/firebaseSetup/fireBase.types";
-import { useClassOptions } from "@/utils/useClasses";
+import { ParentDoc } from "@/firebaseSetup/fireBase.types";
+import { isValidE164 } from "@/utils/phoneValidation";
+import { useStudentOptions } from "@/utils/useStudents";
 import {
   addDoc,
   collection,
@@ -20,56 +21,62 @@ import {
 } from "react-native";
 import { firestore } from "../../firebaseSetup/firebaseSetup";
 
-export default function AddStudentScreen() {
-  const classOptions = useClassOptions();
+export default function CreateParentScreen() {
+  const studentOptions = useStudentOptions();
   const [fullName, setFullName] = useState("");
-  const [classId, setClassId] = useState<string | null>(null);
-  const [rollNumber, setRollNumber] = useState("");
-  const [gender, setGender] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("+91");
+  const [childStudentIds, setChildStudentIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     const trimmedFullName = fullName.trim();
-    const trimmedRollNumber = rollNumber.trim();
-    const trimmedGender = gender.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPhone = phone.trim();
 
-    if (!trimmedFullName || !classId || !trimmedRollNumber || !trimmedGender) {
-      Alert.alert("Missing fields", "Please fill all fields, including class.");
+    if (!trimmedFullName || !trimmedPhone || childStudentIds.length === 0) {
+      Alert.alert(
+        "Missing fields",
+        "Name, phone number, and at least one linked child are required.",
+      );
+      return;
+    }
+    if (!isValidE164(trimmedPhone)) {
+      Alert.alert(
+        "Invalid phone number",
+        "Enter the phone number in E.164 format (e.g. +919876543210) — this must exactly match what the parent will sign in with, or their first login will be rejected.",
+      );
       return;
     }
 
     try {
       setSubmitting(true);
-
       await addDoc(
-        collection(firestore, "students") as CollectionReference<
-          StudentDoc,
-          StudentDoc
+        collection(firestore, "parents") as CollectionReference<
+          ParentDoc,
+          ParentDoc
         >,
         {
           fullName: trimmedFullName,
-          classId,
-          rollNumber: trimmedRollNumber,
-          gender: trimmedGender,
+          email: trimmedEmail,
+          phone: trimmedPhone,
           isActive: true,
-          parentUids: [],
+          authUid: null,
+          childStudentIds,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
+          lastLoginAt: null,
         },
       );
 
-      console.log("Student record created successfully");
-      Alert.alert(
-        "Success",
-        "Student record added. Link a parent from Manage Parents to give them access.",
-      );
+      Alert.alert("Success", "Parent record created and linked.");
       setFullName("");
-      setClassId(null);
-      setRollNumber("");
-      setGender("");
+      setEmail("");
+      setPhone("+91");
+      setChildStudentIds([]);
     } catch (error) {
-      console.error("Failed to add student:", error);
-      Alert.alert("Error", "Could not add student. Please try again.");
+      console.error("Failed to create parent:", error);
+      Alert.alert("Error", "Could not create parent. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -78,45 +85,49 @@ export default function AddStudentScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.heading}>Add Student</Text>
+        <Text style={styles.heading}>Add Parent</Text>
         <Text style={styles.subHeading}>
-          Parent contact info is managed separately under Manage Parents —
-          link this student there once created.
+          The parent signs in with this exact phone number via OTP and sees
+          only the children linked below.
         </Text>
 
         <Text style={styles.label}>Full Name</Text>
         <TextInput
           value={fullName}
           onChangeText={setFullName}
-          placeholder="Enter student name"
+          placeholder="Enter parent name"
+          style={styles.input}
+          editable={!submitting}
+        />
+
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Enter email (optional)"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          style={styles.input}
+          editable={!submitting}
+        />
+
+        <Text style={styles.label}>Phone (E.164, e.g. +919876543210)</Text>
+        <TextInput
+          value={phone}
+          onChangeText={setPhone}
+          placeholder="+919876543210"
+          keyboardType="phone-pad"
           style={styles.input}
           editable={!submitting}
         />
 
         <SelectField
-          label="Class"
-          placeholder="Select class"
-          options={classOptions.map((c) => ({ label: c.label, value: c.id }))}
-          value={classId}
-          onChange={setClassId}
-        />
-
-        <Text style={styles.label}>Roll Number</Text>
-        <TextInput
-          value={rollNumber}
-          onChangeText={setRollNumber}
-          placeholder="Enter roll number"
-          style={styles.input}
-          editable={!submitting}
-        />
-
-        <Text style={styles.label}>Gender</Text>
-        <TextInput
-          value={gender}
-          onChangeText={setGender}
-          placeholder="Enter gender"
-          style={styles.input}
-          editable={!submitting}
+          label="Linked Children"
+          placeholder="Select one or more students"
+          options={studentOptions.map((s) => ({ label: s.label, value: s.id }))}
+          value={childStudentIds}
+          onChange={setChildStudentIds}
+          multiple
         />
 
         <TouchableOpacity
@@ -127,7 +138,7 @@ export default function AddStudentScreen() {
           {submitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Submit</Text>
+            <Text style={styles.buttonText}>Add Parent</Text>
           )}
         </TouchableOpacity>
       </View>

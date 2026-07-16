@@ -1,16 +1,22 @@
 import {
   AdminWithStringDate,
-  StudentwithStringDate,
+  ParentWithStringDate,
+  TeacherWithStringDate,
 } from "@/store/slices/auth.type";
 import { HeaderTitleProps } from "@react-navigation/elements";
 import { Text, View } from "react-native";
 import { AppState, useAppSelector } from "../store/store";
 
 const CustomHeader = (props: HeaderTitleProps) => {
-  const { userInfo, role } = useAppSelector((state: AppState) => state.auth);
-  const studentInfo =
-    role === "student" ? (userInfo as StudentwithStringDate) : null;
+  const { userInfo, role, children, selectedChildId } = useAppSelector(
+    (state: AppState) => state.auth,
+  );
   const adminInfo = role === "admin" ? (userInfo as AdminWithStringDate) : null;
+  const teacherInfo =
+    role === "teacher" ? (userInfo as TeacherWithStringDate) : null;
+  const parentInfo =
+    role === "parent" ? (userInfo as ParentWithStringDate) : null;
+  const selectedChild = children.find((c) => c.id === selectedChildId);
   const screenTitle = typeof props.children === "string" ? props.children : "";
 
   return (
@@ -26,17 +32,21 @@ const CustomHeader = (props: HeaderTitleProps) => {
       }}
     >
       <Text style={{ fontWeight: "600" }}>{screenTitle}</Text>
-      {studentInfo && (
-        <Text style={{ fontWeight: "600" }}>
-          {(studentInfo.fullname || "No Student info") +
-            " · CLASS - " +
-            (studentInfo.class ?? "") +
-            (studentInfo.section ?? "")}
-        </Text>
-      )}
       {adminInfo && (
         <Text style={{ fontWeight: "600" }}>
           {adminInfo.fullName || "No Admin info"}
+        </Text>
+      )}
+      {teacherInfo && (
+        <Text style={{ fontWeight: "600" }}>
+          {teacherInfo.fullName || "No Teacher info"}
+        </Text>
+      )}
+      {parentInfo && (
+        <Text style={{ fontWeight: "600" }}>
+          {selectedChild
+            ? `${selectedChild.fullName} · CLASS - ${selectedChild.classId}`
+            : parentInfo.fullName || "No Parent info"}
         </Text>
       )}
     </View>

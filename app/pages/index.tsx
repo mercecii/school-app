@@ -1,5 +1,4 @@
 import {
-  Entypo,
   FontAwesome5,
   MaterialCommunityIcons,
   MaterialIcons,
@@ -13,8 +12,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useUser } from "../../context/UserContext";
 
+// Only screens with real v2 data behind them are linked here. Several
+// pre-existing placeholder screens (homework, notes, video, syllabus,
+// circular, apply-leave, daily-timetable, download, news-gallery,
+// previous-year-question-paper) still exist under app/pages/ but were out
+// of scope for the roles/attendance/fees/notifications rebuild — left
+// untouched, just not exposed as if they were live features yet.
 const dashboardItems = [
   {
     key: "dashboard",
@@ -25,73 +29,17 @@ const dashboardItems = [
     ),
   },
   {
-    key: "calendar",
-    route: "calendar",
-    label: "CALENDAR",
-    icon: <MaterialIcons name="calendar-today" size={48} color="#2196f3" />,
-  },
-  {
     key: "attendance",
     route: "attendance",
     label: "ATTENDANCE",
     icon: <FontAwesome5 name="user-check" size={48} color="#4caf50" />,
   },
   {
-    key: "homework",
-    route: "homework",
-    label: "HOMEWORK",
-    icon: <Entypo name="book" size={48} color="#e91e63" />,
-  },
-  {
-    key: "notes",
-    route: "notes",
-    label: "ACADEMIC NOTES",
-    icon: <MaterialCommunityIcons name="notebook" size={48} color="#ffc107" />,
-  },
-  {
-    key: "video",
-    route: "video",
-    label: "ACADEMIC VIDEO",
-    icon: <Entypo name="video" size={48} color="#f44336" />,
-  },
-  {
-    key: "syllabus",
-    route: "syllabus",
-    label: "SYLLABUS",
+    key: "fees",
+    route: "fees",
+    label: "FEES",
     icon: (
-      <MaterialCommunityIcons
-        name="file-document-edit"
-        size={48}
-        color="#3f51b5"
-      />
-    ),
-  },
-  {
-    key: "circular",
-    route: "circular",
-    label: "CIRCULAR",
-    icon: (
-      <MaterialCommunityIcons name="bulletin-board" size={48} color="#00bcd4" />
-    ),
-  },
-  {
-    key: "applyLeave",
-    route: "apply-leave",
-    label: "APPLY LEAVE",
-    icon: (
-      <MaterialCommunityIcons name="account-tie" size={48} color="#009688" />
-    ),
-  },
-  {
-    key: "previous-year-question-paper",
-    route: "previous-year-question-paper",
-    label: "PREVIOUS YEAR QUESTION PAPER",
-    icon: (
-      <MaterialCommunityIcons
-        name="file-document-outline"
-        size={48}
-        color="#009688"
-      />
+      <MaterialCommunityIcons name="cash-multiple" size={48} color="#8bc34a" />
     ),
   },
   {
@@ -101,6 +49,12 @@ const dashboardItems = [
     icon: (
       <MaterialCommunityIcons name="bell-outline" size={48} color="#9c27b0" />
     ),
+  },
+  {
+    key: "calendar",
+    route: "calendar",
+    label: "CALENDAR",
+    icon: <MaterialIcons name="calendar-today" size={48} color="#2196f3" />,
   },
   {
     key: "profile",
@@ -114,112 +68,18 @@ const dashboardItems = [
       />
     ),
   },
-  {
-    key: "news-gallery",
-    route: "news-gallery",
-    label: "NEWS & GALLERY",
-    icon: (
-      <MaterialCommunityIcons
-        name="image-multiple-outline"
-        size={48}
-        color="#795548"
-      />
-    ),
-  },
-  {
-    key: "events",
-    route: "events",
-    label: "EVENTS",
-    icon: (
-      <MaterialCommunityIcons name="calendar-star" size={48} color="#673ab7" />
-    ),
-  },
-  {
-    key: "fees",
-    route: "fees",
-    label: "FEES",
-    icon: (
-      <MaterialCommunityIcons name="cash-multiple" size={48} color="#8bc34a" />
-    ),
-  },
-  {
-    key: "download",
-    route: "download",
-    label: "DOWNLOAD",
-    icon: (
-      <MaterialCommunityIcons
-        name="download-outline"
-        size={48}
-        color="#cddc39"
-      />
-    ),
-  },
-  {
-    key: "daily-timetable",
-    route: "daily-timetable",
-    label: "DAILY TIMETABLE",
-    icon: (
-      <MaterialCommunityIcons name="clock-outline" size={48} color="#e91e63" />
-    ),
-  },
-  {
-    key: "calendar-remove",
-    route: "calendar-remove",
-    label: "CALENDAR REMOVE",
-    icon: (
-      <MaterialCommunityIcons
-        name="calendar-remove-outline"
-        size={48}
-        color="#9e9e9e"
-      />
-    ),
-  },
-  {
-    key: "events",
-    route: "events",
-    label: "EVENTS",
-    icon: (
-      <MaterialCommunityIcons name="calendar-star" size={48} color="#673ab7" />
-    ),
-  },
-  {
-    key: "fees",
-    route: "fees",
-    label: "FEES",
-    icon: (
-      <MaterialCommunityIcons name="cash-multiple" size={48} color="#8bc34a" />
-    ),
-  },
-  {
-    key: "syllabus",
-    route: "syllabus",
-    label: "SYLLABUS",
-    icon: (
-      <MaterialCommunityIcons
-        name="file-document-edit"
-        size={48}
-        color="#3f51b5"
-      />
-    ),
-  },
 ];
 
-export default function StudentHomePage() {
-  const user = useUser();
-  console.log("eee: app/pages/index.tsx | user from context:", user);
-  const renderItem = ({ item }: { item: any }) => (
+export default function ParentHomePage() {
+  const renderItem = ({ item }: { item: (typeof dashboardItems)[number] }) => (
     <TouchableOpacity
-      onPress={() => {
-        console.log("Tapped:", item.label);
-        router.push(`./pages/${item.route}`);
-      }}
+      onPress={() => router.push(`./pages/${item.route}`)}
       style={styles.card}
     >
       {item.icon}
       <Text style={styles.label}>{item.label}</Text>
     </TouchableOpacity>
   );
-  console.log("DashboardScreen rendered");
 
   return (
     <View style={styles.container}>

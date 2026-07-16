@@ -4,6 +4,7 @@ import type {
   AuthConfirmationResult,
   AuthStateCallback,
   AuthUserCredential,
+  EnsureFirestoreSession,
   Unsubscribe,
 } from "./authClient.types";
 
@@ -27,6 +28,7 @@ type AuthModule = {
     currentAuth: AuthClient,
     email: string,
   ) => Promise<void>;
+  ensureFirestoreSession: EnsureFirestoreSession;
 };
 
 const authModule: AuthModule =
@@ -43,6 +45,7 @@ export const {
   signInWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
+  ensureFirestoreSession,
 } = authModule;
 
 export type {

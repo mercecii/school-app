@@ -1,6 +1,5 @@
-import SelectField from "@/components/SelectField";
-import { StudentDoc } from "@/firebaseSetup/fireBase.types";
-import { useClassOptions } from "@/utils/useClasses";
+import { ClassDoc } from "@/firebaseSetup/fireBase.types";
+import { firestore } from "@/firebaseSetup/firebaseSetup";
 import {
   addDoc,
   collection,
@@ -18,58 +17,50 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { firestore } from "../../firebaseSetup/firebaseSetup";
 
-export default function AddStudentScreen() {
-  const classOptions = useClassOptions();
-  const [fullName, setFullName] = useState("");
-  const [classId, setClassId] = useState<string | null>(null);
-  const [rollNumber, setRollNumber] = useState("");
-  const [gender, setGender] = useState("");
+export default function CreateClassScreen() {
+  const [grade, setGrade] = useState("");
+  const [section, setSection] = useState("");
+  const [academicYear, setAcademicYear] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    const trimmedFullName = fullName.trim();
-    const trimmedRollNumber = rollNumber.trim();
-    const trimmedGender = gender.trim();
+    const trimmedGrade = grade.trim();
+    const trimmedSection = section.trim();
+    const trimmedYear = academicYear.trim();
 
-    if (!trimmedFullName || !classId || !trimmedRollNumber || !trimmedGender) {
-      Alert.alert("Missing fields", "Please fill all fields, including class.");
+    if (!trimmedGrade || !trimmedSection || !trimmedYear) {
+      Alert.alert("Missing fields", "Please fill all fields.");
       return;
     }
 
     try {
       setSubmitting(true);
-
       await addDoc(
-        collection(firestore, "students") as CollectionReference<
-          StudentDoc,
-          StudentDoc
+        collection(firestore, "classes") as CollectionReference<
+          ClassDoc,
+          ClassDoc
         >,
         {
-          fullName: trimmedFullName,
-          classId,
-          rollNumber: trimmedRollNumber,
-          gender: trimmedGender,
+          name: `Class ${trimmedGrade} - ${trimmedSection}`,
+          grade: trimmedGrade,
+          section: trimmedSection,
+          academicYear: trimmedYear,
+          classTeacherId: null,
+          classTeacherUid: null,
           isActive: true,
-          parentUids: [],
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         },
       );
 
-      console.log("Student record created successfully");
-      Alert.alert(
-        "Success",
-        "Student record added. Link a parent from Manage Parents to give them access.",
-      );
-      setFullName("");
-      setClassId(null);
-      setRollNumber("");
-      setGender("");
+      Alert.alert("Success", "Class created.");
+      setGrade("");
+      setSection("");
+      setAcademicYear("");
     } catch (error) {
-      console.error("Failed to add student:", error);
-      Alert.alert("Error", "Could not add student. Please try again.");
+      console.error("Failed to create class:", error);
+      Alert.alert("Error", "Could not create class. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -78,43 +69,35 @@ export default function AddStudentScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.heading}>Add Student</Text>
+        <Text style={styles.heading}>Create Class</Text>
         <Text style={styles.subHeading}>
-          Parent contact info is managed separately under Manage Parents —
-          link this student there once created.
+          The homeroom teacher can be assigned afterwards from Manage
+          Teachers.
         </Text>
 
-        <Text style={styles.label}>Full Name</Text>
+        <Text style={styles.label}>Grade</Text>
         <TextInput
-          value={fullName}
-          onChangeText={setFullName}
-          placeholder="Enter student name"
+          value={grade}
+          onChangeText={setGrade}
+          placeholder="e.g. 5"
           style={styles.input}
           editable={!submitting}
         />
 
-        <SelectField
-          label="Class"
-          placeholder="Select class"
-          options={classOptions.map((c) => ({ label: c.label, value: c.id }))}
-          value={classId}
-          onChange={setClassId}
-        />
-
-        <Text style={styles.label}>Roll Number</Text>
+        <Text style={styles.label}>Section</Text>
         <TextInput
-          value={rollNumber}
-          onChangeText={setRollNumber}
-          placeholder="Enter roll number"
+          value={section}
+          onChangeText={setSection}
+          placeholder="e.g. A"
           style={styles.input}
           editable={!submitting}
         />
 
-        <Text style={styles.label}>Gender</Text>
+        <Text style={styles.label}>Academic Year</Text>
         <TextInput
-          value={gender}
-          onChangeText={setGender}
-          placeholder="Enter gender"
+          value={academicYear}
+          onChangeText={setAcademicYear}
+          placeholder="e.g. 2026"
           style={styles.input}
           editable={!submitting}
         />
@@ -127,7 +110,7 @@ export default function AddStudentScreen() {
           {submitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Submit</Text>
+            <Text style={styles.buttonText}>Create Class</Text>
           )}
         </TouchableOpacity>
       </View>

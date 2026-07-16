@@ -1,4 +1,5 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
+import { Auth, getAuth } from "firebase/auth";
 import { Firestore, getFirestore } from "firebase/firestore";
 
 const firebaseConfigDev = {
@@ -54,5 +55,14 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Firestore
 export const firestore: Firestore = getFirestore(app);
+
+// Web Auth SDK instance on the *same* app as Firestore above. On native
+// this carries no session by itself — the real sign-in happens via
+// @react-native-firebase/auth (a separate native App instance). See
+// utils/firestoreAuthBridge.ts, which exchanges the native session for a
+// custom-token sign-in here so Firestore calls carry a valid request.auth.
+// On web, authClient.web.ts's `auth` already *is* this instance, so no
+// bridging is needed there.
+export const webAuth: Auth = getAuth(app);
 
 export default app;

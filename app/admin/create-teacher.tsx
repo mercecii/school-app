@@ -1,5 +1,6 @@
 import SelectField from "@/components/SelectField";
-import { StudentDoc } from "@/firebaseSetup/fireBase.types";
+import { TeacherDoc } from "@/firebaseSetup/fireBase.types";
+import { isValidE164 } from "@/utils/phoneValidation";
 import { useClassOptions } from "@/utils/useClasses";
 import {
   addDoc,
@@ -20,56 +21,59 @@ import {
 } from "react-native";
 import { firestore } from "../../firebaseSetup/firebaseSetup";
 
-export default function AddStudentScreen() {
+export default function CreateTeacherScreen() {
   const classOptions = useClassOptions();
   const [fullName, setFullName] = useState("");
-  const [classId, setClassId] = useState<string | null>(null);
-  const [rollNumber, setRollNumber] = useState("");
-  const [gender, setGender] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("+91");
+  const [classIds, setClassIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     const trimmedFullName = fullName.trim();
-    const trimmedRollNumber = rollNumber.trim();
-    const trimmedGender = gender.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPhone = phone.trim();
 
-    if (!trimmedFullName || !classId || !trimmedRollNumber || !trimmedGender) {
-      Alert.alert("Missing fields", "Please fill all fields, including class.");
+    if (!trimmedFullName || !trimmedPhone) {
+      Alert.alert("Missing fields", "Name and phone number are required.");
+      return;
+    }
+    if (!isValidE164(trimmedPhone)) {
+      Alert.alert(
+        "Invalid phone number",
+        "Enter the phone number in E.164 format (e.g. +919876543210) — this must exactly match what the teacher will sign in with, or their first login will be rejected.",
+      );
       return;
     }
 
     try {
       setSubmitting(true);
-
       await addDoc(
-        collection(firestore, "students") as CollectionReference<
-          StudentDoc,
-          StudentDoc
+        collection(firestore, "teachers") as CollectionReference<
+          TeacherDoc,
+          TeacherDoc
         >,
         {
           fullName: trimmedFullName,
-          classId,
-          rollNumber: trimmedRollNumber,
-          gender: trimmedGender,
+          email: trimmedEmail,
+          phone: trimmedPhone,
           isActive: true,
-          parentUids: [],
+          authUid: null,
+          classIds,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
+          lastLoginAt: null,
         },
       );
 
-      console.log("Student record created successfully");
-      Alert.alert(
-        "Success",
-        "Student record added. Link a parent from Manage Parents to give them access.",
-      );
+      Alert.alert("Success", "Teacher record created.");
       setFullName("");
-      setClassId(null);
-      setRollNumber("");
-      setGender("");
+      setEmail("");
+      setPhone("+91");
+      setClassIds([]);
     } catch (error) {
-      console.error("Failed to add student:", error);
-      Alert.alert("Error", "Could not add student. Please try again.");
+      console.error("Failed to create teacher:", error);
+      Alert.alert("Error", "Could not create teacher. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -78,45 +82,49 @@ export default function AddStudentScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.heading}>Add Student</Text>
+        <Text style={styles.heading}>Add Teacher</Text>
         <Text style={styles.subHeading}>
-          Parent contact info is managed separately under Manage Parents —
-          link this student there once created.
+          The teacher signs in with this exact phone number via OTP — no
+          password to set here.
         </Text>
 
         <Text style={styles.label}>Full Name</Text>
         <TextInput
           value={fullName}
           onChangeText={setFullName}
-          placeholder="Enter student name"
+          placeholder="Enter teacher name"
+          style={styles.input}
+          editable={!submitting}
+        />
+
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Enter email (optional)"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          style={styles.input}
+          editable={!submitting}
+        />
+
+        <Text style={styles.label}>Phone (E.164, e.g. +919876543210)</Text>
+        <TextInput
+          value={phone}
+          onChangeText={setPhone}
+          placeholder="+919876543210"
+          keyboardType="phone-pad"
           style={styles.input}
           editable={!submitting}
         />
 
         <SelectField
-          label="Class"
-          placeholder="Select class"
+          label="Assigned Classes"
+          placeholder="Select classes taught"
           options={classOptions.map((c) => ({ label: c.label, value: c.id }))}
-          value={classId}
-          onChange={setClassId}
-        />
-
-        <Text style={styles.label}>Roll Number</Text>
-        <TextInput
-          value={rollNumber}
-          onChangeText={setRollNumber}
-          placeholder="Enter roll number"
-          style={styles.input}
-          editable={!submitting}
-        />
-
-        <Text style={styles.label}>Gender</Text>
-        <TextInput
-          value={gender}
-          onChangeText={setGender}
-          placeholder="Enter gender"
-          style={styles.input}
-          editable={!submitting}
+          value={classIds}
+          onChange={setClassIds}
+          multiple
         />
 
         <TouchableOpacity
@@ -127,7 +135,7 @@ export default function AddStudentScreen() {
           {submitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Submit</Text>
+            <Text style={styles.buttonText}>Add Teacher</Text>
           )}
         </TouchableOpacity>
       </View>

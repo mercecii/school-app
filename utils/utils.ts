@@ -1,10 +1,12 @@
 import * as ExpoNotifications from "expo-notifications";
 import { Platform } from "react-native";
-import { savePushToken } from "./pushTokenManager";
+import { PushTokenCollection, savePushToken } from "./pushTokenManager";
 
 let notificationsConfigured = false;
-let activePushRegistration: { uid: string; promise: Promise<string> } | null =
-  null;
+let activePushRegistration: {
+  key: string;
+  promise: Promise<string>;
+} | null = null;
 
 export const configureNotificationHandlingAsync = async (): Promise<void> => {
   if (Platform.OS === "web") {
@@ -43,16 +45,25 @@ export const configureNotificationHandlingAsync = async (): Promise<void> => {
   notificationsConfigured = true;
 };
 
+/**
+ * Registers the current device for push notifications under
+ * {collectionName}/{docId}/devices/{deviceId}. `docId` is the role doc's
+ * own ID — the Firebase Auth UID for admins, but the auto-ID `profileId`
+ * for teachers/parents (they aren't UID-keyed, see docs/decisions.md).
+ */
 export const registerForPushNotificationsAsync = async (
-  uid: string,
+  collectionName: PushTokenCollection,
+  docId: string,
 ): Promise<string> => {
-  if (!uid) {
-    console.log("❌ UID not available, skipping token save");
+  if (!docId) {
+    console.log("❌ docId not available, skipping token save");
     return "";
   }
 
-  if (activePushRegistration?.uid === uid) {
-    console.log("⏳ Push registration already in progress for UID:", uid);
+  const key = `${collectionName}/${docId}`;
+
+  if (activePushRegistration?.key === key) {
+    console.log("⏳ Push registration already in progress for:", key);
     return activePushRegistration.promise;
   }
 
@@ -72,9 +83,9 @@ export const registerForPushNotificationsAsync = async (
       });
       const token = tokenResponse.data;
       console.log("🔥 TOKEN:", token);
-      console.log("👤 UID:", uid);
+      console.log("👤 Registering under:", key);
 
-      await savePushToken(uid, token);
+      await savePushToken(collectionName, docId, token);
       return token;
     } catch (e) {
       console.error("❌ Token save failed:", e);
@@ -82,7 +93,7 @@ export const registerForPushNotificationsAsync = async (
     }
   })();
 
-  activePushRegistration = { uid, promise: registrationPromise };
+  activePushRegistration = { key, promise: registrationPromise };
 
   try {
     return await registrationPromise;

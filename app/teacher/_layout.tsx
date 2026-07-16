@@ -7,9 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserContext } from "../../context/UserContext";
 import { auth } from "../../utils/authClient";
 
-// Only screens with real v2 data behind them are in the drawer — see the
-// comment in app/pages/index.tsx for what's intentionally left unlinked.
-export default function RootLayoutLevel2() {
+export default function TeacherLayout() {
   return (
     <UserContext.Provider value={auth.currentUser}>
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -31,18 +29,9 @@ export default function RootLayoutLevel2() {
             }}
           />
           <Drawer.Screen
-            name="dashboard"
+            name="mark-attendance"
             options={{
-              title: "Dashboard",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="view-dashboard-outline" color={color} size={size} />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="attendance"
-            options={{
-              title: "Attendance",
+              title: "Mark Attendance",
               drawerIcon: ({ color, size }) => (
                 <Icon
                   name="clipboard-check-outline"
@@ -53,29 +42,11 @@ export default function RootLayoutLevel2() {
             }}
           />
           <Drawer.Screen
-            name="fees"
+            name="post-announcement"
             options={{
-              title: "Fees",
+              title: "Post Announcement",
               drawerIcon: ({ color, size }) => (
-                <Icon name="cash-multiple" color={color} size={size} />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="notifications"
-            options={{
-              title: "Notifications",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="bell-outline" color={color} size={size} />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="calendar"
-            options={{
-              title: "Calendar",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="calendar-month-outline" color={color} size={size} />
+                <Icon name="bullhorn-outline" color={color} size={size} />
               ),
             }}
           />
