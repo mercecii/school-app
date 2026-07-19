@@ -87,8 +87,11 @@ service cloud.firestore {
       allow delete: if isAdmin();
 
       match /devices/{deviceId} {
+        // authUid, not phone — a phone number can be corrected by admin
+        // after adoption (see manage-teachers.tsx) without invalidating an
+        // already-adopted teacher's ongoing access to their own devices.
         allow read, write: if isAdmin() ||
-          isPhoneOwner(get(/databases/$(database)/documents/teachers/$(teacherId)).data.phone);
+          get(/databases/$(database)/documents/teachers/$(teacherId)).data.authUid == request.auth.uid;
       }
       match /{subCollection}/{doc} {
         allow read, write: if false;
@@ -109,8 +112,9 @@ service cloud.firestore {
       allow delete: if isAdmin();
 
       match /devices/{deviceId} {
+        // authUid, not phone — see matching comment on /teachers/devices.
         allow read, write: if isAdmin() ||
-          isPhoneOwner(get(/databases/$(database)/documents/parents/$(parentId)).data.phone);
+          get(/databases/$(database)/documents/parents/$(parentId)).data.authUid == request.auth.uid;
       }
       match /{subCollection}/{doc} {
         allow read, write: if false;
