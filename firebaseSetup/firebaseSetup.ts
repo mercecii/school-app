@@ -1,6 +1,7 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { Auth, getAuth } from "firebase/auth";
+import { Auth, getAuth, inMemoryPersistence, initializeAuth } from "firebase/auth";
 import { Firestore, getFirestore } from "firebase/firestore";
+import { Platform } from "react-native";
 
 const firebaseConfigDev = {
   apiKey: "AIzaSyDTlIS5HeMiYqll3bcTh2_Wz14z1pUkSSM",
@@ -63,6 +64,16 @@ export const firestore: Firestore = getFirestore(app);
 // custom-token sign-in here so Firestore calls carry a valid request.auth.
 // On web, authClient.web.ts's `auth` already *is* this instance, so no
 // bridging is needed there.
-export const webAuth: Auth = getAuth(app);
+//
+// On native, this session is re-minted from scratch on every native auth
+// state change (see ensureFirestoreSession) — it's never the source of
+// truth, so it deliberately uses in-memory persistence rather than pulling
+// in AsyncStorage just to persist a session that gets rebuilt anyway. Web
+// needs its default (browser-local) persistence since there it's the real,
+// only session.
+export const webAuth: Auth =
+  Platform.OS === "web"
+    ? getAuth(app)
+    : initializeAuth(app, { persistence: inMemoryPersistence });
 
 export default app;
