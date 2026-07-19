@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "ssr-juniors"
+    "default": "ssr-juniors",
+    "production": "ssr-juniors",
+    "dev": "ssr-juniors-dev",
+    "staging": "ssr-juniors-dev"
   }
 }

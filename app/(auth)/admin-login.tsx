@@ -1,7 +1,5 @@
 import { defaultBranding } from "@/config/branding";
-import { firestore } from "@/firebaseSetup/firebaseSetup";
 import { useRouter } from "expo-router";
-import { doc, getDoc } from "firebase/firestore";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -13,11 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  auth,
-  signInWithEmailAndPassword,
-  signOut,
-} from "../../utils/authClient";
+import { auth, signInWithEmailAndPassword } from "../../utils/authClient";
 
 const PRIMARY = defaultBranding.primaryColor;
 
@@ -38,28 +32,12 @@ export default function AdminLogin() {
     setLoading(true);
     setError("");
     try {
-      const credential = await signInWithEmailAndPassword(
-        auth,
-        trimmedEmail,
-        password,
-      );
-      const uid = credential.user?.uid;
-
-      if (!uid) {
-        setError("Unable to validate admin account.");
-        await signOut(auth);
-        return;
-      }
-
-      const adminSnap = await getDoc(doc(firestore, "admins", uid));
-
-      if (!adminSnap.exists()) {
-        await signOut(auth);
-        setError("You are not an admin user.");
-        return;
-      }
-
-      router.replace("/admin");
+      await signInWithEmailAndPassword(auth, trimmedEmail, password);
+      // AuthGate's onAuthStateChanged fires from here, bridges the Firestore
+      // session, resolves the caller against admins/{uid}, sets Redux state,
+      // and redirects to /admin (or shows not-registered/link-error). No
+      // need to duplicate that work here — see login.tsx for the same
+      // pattern on the phone-auth side.
     } catch (e: any) {
       console.error("Admin login error:", e);
       const code = String(e?.code ?? "");

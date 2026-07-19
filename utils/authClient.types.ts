@@ -16,3 +16,10 @@ export type AuthUserCredential =
 
 export type AuthStateCallback = (user: AuthUser | null) => void;
 export type Unsubscribe = () => void;
+
+// Bridges the platform's auth session into the web `firebase/firestore`
+// client's auth context. Native has a separate Firebase App instance for
+// Firestore than for Auth (see firebaseSetup.ts) and needs an explicit
+// custom-token exchange; web's Firestore already shares the same app/session
+// as auth, so this is a no-op there. Must resolve before any Firestore call.
+export type EnsureFirestoreSession = (user: AuthUser) => Promise<void>;

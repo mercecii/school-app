@@ -10,14 +10,6 @@ import {
 
 const dashboardItems = [
   {
-    key: "create-notification",
-    route: "create-notification",
-    label: "CREATE NOTIFICATIONS",
-    icon: (
-      <MaterialCommunityIcons name="bell-outline" size={48} color="#9c27b0" />
-    ),
-  },
-  {
     key: "add-student",
     route: "add-student",
     label: "ADD STUDENT",
@@ -27,6 +19,112 @@ const dashboardItems = [
         size={48}
         color="#3f51b5"
       />
+    ),
+  },
+  {
+    key: "create-teacher",
+    route: "create-teacher",
+    label: "ADD TEACHER",
+    icon: (
+      <MaterialCommunityIcons
+        name="account-tie-outline"
+        size={48}
+        color="#0d9488"
+      />
+    ),
+  },
+  {
+    key: "manage-teachers",
+    route: "manage-teachers",
+    label: "MANAGE TEACHERS",
+    icon: (
+      <MaterialCommunityIcons
+        name="account-tie-hat-outline"
+        size={48}
+        color="#0f766e"
+      />
+    ),
+  },
+  {
+    key: "create-parent",
+    route: "create-parent",
+    label: "ADD PARENT",
+    icon: (
+      <MaterialCommunityIcons
+        name="account-heart-outline"
+        size={48}
+        color="#db2777"
+      />
+    ),
+  },
+  {
+    key: "manage-parents",
+    route: "manage-parents",
+    label: "MANAGE PARENTS",
+    icon: (
+      <MaterialCommunityIcons
+        name="account-supervisor-outline"
+        size={48}
+        color="#be185d"
+      />
+    ),
+  },
+  {
+    key: "manage-students",
+    route: "manage-students",
+    label: "MANAGE STUDENTS",
+    icon: (
+      <MaterialCommunityIcons
+        name="account-school-outline"
+        size={48}
+        color="#4338ca"
+      />
+    ),
+  },
+  {
+    key: "create-class",
+    route: "create-class",
+    label: "CREATE CLASS",
+    icon: (
+      <MaterialCommunityIcons
+        name="google-classroom"
+        size={48}
+        color="#ea580c"
+      />
+    ),
+  },
+  {
+    key: "manage-classes",
+    route: "manage-classes",
+    label: "MANAGE CLASSES",
+    icon: (
+      <MaterialCommunityIcons
+        name="clipboard-text-outline"
+        size={48}
+        color="#65a30d"
+      />
+    ),
+  },
+  {
+    key: "create-fee-structure",
+    route: "create-fee-structure",
+    label: "CREATE FEE STRUCTURE",
+    icon: <MaterialCommunityIcons name="cash-plus" size={48} color="#059669" />,
+  },
+  {
+    key: "manage-fees",
+    route: "manage-fees",
+    label: "MANAGE FEES",
+    icon: (
+      <MaterialCommunityIcons name="cash-multiple" size={48} color="#16a34a" />
+    ),
+  },
+  {
+    key: "create-notification",
+    route: "create-notification",
+    label: "CREATE NOTIFICATIONS",
+    icon: (
+      <MaterialCommunityIcons name="bell-outline" size={48} color="#9c27b0" />
     ),
   },
 ];

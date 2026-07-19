@@ -101,9 +101,10 @@ export default function Login() {
     setLoading(true);
     try {
       await confirmationResult.confirm(trimmed);
-      // AuthGate's onAuthStateChanged fires from here, runs ensureStudentDocUsesUid,
-      // registers push token, sets Redux state, and redirects to /pages (or shows
-      // NotRegisteredScreen). No need to duplicate that work here.
+      // AuthGate's onAuthStateChanged fires from here, resolves the caller
+      // against teachers/parents (resolvePhoneLoginRole), registers push
+      // token, sets Redux state, and redirects to /teacher or /pages (or
+      // shows NotRegisteredScreen). No need to duplicate that work here.
     } catch (e: any) {
       console.error("OTP verify error:", e);
       console.error("Error code:", e.code);
@@ -121,7 +122,7 @@ export default function Login() {
       <View style={styles.card}>
         <Text style={styles.title}>Welcome Back!</Text>
         <Text style={styles.subtitle}>
-          Login with your registered phone number
+          Parent or teacher? Login with your registered phone number
         </Text>
 
         <TextInput

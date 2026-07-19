@@ -3,7 +3,7 @@ name: Deploy Web to Firebase Hosting
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   deploy:
@@ -21,6 +21,8 @@ jobs:
 
       - name: Build web export
         run: npx expo export --platform web
+        env:
+          EXPO_PUBLIC_APP_ENV: staging
 
       - name: Deploy to Firebase Hosting (E2)
         uses: FirebaseExtended/action-hosting-deploy@v0

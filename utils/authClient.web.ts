@@ -11,12 +11,18 @@ import type {
   AuthClient,
   AuthConfirmationResult,
   AuthStateCallback,
+  AuthUser,
   AuthUserCredential,
   BrowserAuth,
   Unsubscribe,
 } from "./authClient.types";
 
 export const auth: AuthClient = getAuth(app);
+
+// No-op on web: `auth` above already *is* the same Auth instance Firestore
+// uses (both hang off the same `app`), so there's no separate session to
+// bridge — see the native implementation for why this exists at all.
+export async function ensureFirestoreSession(_user: AuthUser): Promise<void> {}
 
 export function onAuthStateChanged(
   currentAuth: AuthClient,

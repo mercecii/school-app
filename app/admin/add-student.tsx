@@ -1,4 +1,12 @@
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import SelectField from "@/components/SelectField";
+import { StudentDoc } from "@/firebaseSetup/fireBase.types";
+import { useClassOptions } from "@/utils/useClasses";
+import {
+  addDoc,
+  collection,
+  CollectionReference,
+  serverTimestamp,
+} from "firebase/firestore";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -13,68 +21,52 @@ import {
 import { firestore } from "../../firebaseSetup/firebaseSetup";
 
 export default function AddStudentScreen() {
-  const [fullname, setFullname] = useState("");
-  const [studentClass, setStudentClass] = useState("");
-  const [section, setSection] = useState("");
+  const classOptions = useClassOptions();
+  const [fullName, setFullName] = useState("");
+  const [classId, setClassId] = useState<string | null>(null);
   const [rollNumber, setRollNumber] = useState("");
   const [gender, setGender] = useState("");
-  const [parentName, setParentName] = useState("");
-  const [parentEmail, setParentEmail] = useState("");
-  const [parentPhone, setParentPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    const trimmedFullname = fullname.trim();
-    const trimmedClass = studentClass.trim();
-    const trimmedSection = section.trim();
+    const trimmedFullName = fullName.trim();
     const trimmedRollNumber = rollNumber.trim();
     const trimmedGender = gender.trim();
-    const trimmedParentName = parentName.trim();
-    const trimmedParentEmail = parentEmail.trim();
-    const trimmedPhone = parentPhone.trim();
 
-    if (
-      !trimmedFullname ||
-      !trimmedClass ||
-      !trimmedSection ||
-      !trimmedRollNumber ||
-      !trimmedGender ||
-      !trimmedParentName ||
-      !trimmedParentEmail ||
-      !trimmedPhone
-    ) {
-      Alert.alert("Missing fields", "Please fill all fields.");
+    if (!trimmedFullName || !classId || !trimmedRollNumber || !trimmedGender) {
+      Alert.alert("Missing fields", "Please fill all fields, including class.");
       return;
     }
 
     try {
       setSubmitting(true);
 
-      await addDoc(collection(firestore, "students"), {
-        fullname: trimmedFullname,
-        class: trimmedClass,
-        section: trimmedSection,
-        rollNumber: trimmedRollNumber,
-        gender: trimmedGender,
-        parentName: trimmedParentName,
-        parentEmail: trimmedParentEmail,
-        parentPhone: trimmedPhone,
-        role: "student",
-        isActive: true,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
+      await addDoc(
+        collection(firestore, "students") as CollectionReference<
+          StudentDoc,
+          StudentDoc
+        >,
+        {
+          fullName: trimmedFullName,
+          classId,
+          rollNumber: trimmedRollNumber,
+          gender: trimmedGender,
+          isActive: true,
+          parentUids: [],
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+      );
 
       console.log("Student record created successfully");
-      Alert.alert("Success", "Student record added.");
-      setFullname("");
-      setStudentClass("");
-      setSection("");
+      Alert.alert(
+        "Success",
+        "Student record added. Link a parent from Manage Parents to give them access.",
+      );
+      setFullName("");
+      setClassId(null);
       setRollNumber("");
       setGender("");
-      setParentName("");
-      setParentEmail("");
-      setParentPhone("");
     } catch (error) {
       console.error("Failed to add student:", error);
       Alert.alert("Error", "Could not add student. Please try again.");
@@ -87,32 +79,26 @@ export default function AddStudentScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
         <Text style={styles.heading}>Add Student</Text>
+        <Text style={styles.subHeading}>
+          Parent contact info is managed separately under Manage Parents —
+          link this student there once created.
+        </Text>
 
         <Text style={styles.label}>Full Name</Text>
         <TextInput
-          value={fullname}
-          onChangeText={setFullname}
+          value={fullName}
+          onChangeText={setFullName}
           placeholder="Enter student name"
           style={styles.input}
           editable={!submitting}
         />
 
-        <Text style={styles.label}>Class</Text>
-        <TextInput
-          value={studentClass}
-          onChangeText={setStudentClass}
-          placeholder="Enter class"
-          style={styles.input}
-          editable={!submitting}
-        />
-
-        <Text style={styles.label}>Section</Text>
-        <TextInput
-          value={section}
-          onChangeText={setSection}
-          placeholder="Enter section"
-          style={styles.input}
-          editable={!submitting}
+        <SelectField
+          label="Class"
+          placeholder="Select class"
+          options={classOptions.map((c) => ({ label: c.label, value: c.id }))}
+          value={classId}
+          onChange={setClassId}
         />
 
         <Text style={styles.label}>Roll Number</Text>
@@ -129,36 +115,6 @@ export default function AddStudentScreen() {
           value={gender}
           onChangeText={setGender}
           placeholder="Enter gender"
-          style={styles.input}
-          editable={!submitting}
-        />
-
-        <Text style={styles.label}>Parent Name</Text>
-        <TextInput
-          value={parentName}
-          onChangeText={setParentName}
-          placeholder="Enter parent name"
-          style={styles.input}
-          editable={!submitting}
-        />
-
-        <Text style={styles.label}>Parent Email</Text>
-        <TextInput
-          value={parentEmail}
-          onChangeText={setParentEmail}
-          placeholder="Enter parent email"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          style={styles.input}
-          editable={!submitting}
-        />
-
-        <Text style={styles.label}>Parent Phone</Text>
-        <TextInput
-          value={parentPhone}
-          onChangeText={setParentPhone}
-          placeholder="Enter parent phone"
-          keyboardType="phone-pad"
           style={styles.input}
           editable={!submitting}
         />
@@ -198,8 +154,13 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginBottom: 6,
     color: "#1f2937",
+  },
+  subHeading: {
+    fontSize: 13,
+    color: "#6b7280",
+    marginBottom: 10,
   },
   label: {
     fontSize: 14,

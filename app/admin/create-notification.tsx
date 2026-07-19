@@ -1,4 +1,6 @@
-import { NotificationDoc } from "@/firebaseSetup/fireBase.types";
+import SelectField from "@/components/SelectField";
+import { NotificationDoc, NotificationTargetType } from "@/firebaseSetup/fireBase.types";
+import { useClassOptions } from "@/utils/useClasses";
 import {
   addDoc,
   collection,
@@ -7,7 +9,6 @@ import {
 } from "firebase/firestore";
 import { useState } from "react";
 import {
-  Alert,
   Platform,
   ScrollView,
   StyleSheet,
@@ -16,6 +17,7 @@ import {
   ToastAndroid,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { firestore } from "../../firebaseSetup/firebaseSetup";
@@ -23,21 +25,27 @@ import { AdminWithStringDate } from "../../store/slices/auth.type";
 import { AppState } from "../../store/store";
 import { auth } from "../../utils/authClient";
 
+const TARGET_TYPES: { label: string; value: NotificationTargetType }[] = [
+  { label: "Whole School", value: "school" },
+  { label: "One Class", value: "class" },
+];
+
 export default function AdminNotifications() {
   const userInfo: AdminWithStringDate = useSelector(
     (state: AppState) => state.auth.userInfo,
   ) as AdminWithStringDate;
-  console.log("eee: app/admin/index.tsx");
+  const classOptions = useClassOptions();
 
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
+  const [targetType, setTargetType] = useState<NotificationTargetType>("school");
+  const [classId, setClassId] = useState<string | null>(null);
 
   const showToast = (toastMessage: string) => {
     if (Platform.OS === "android") {
       ToastAndroid.show(toastMessage, ToastAndroid.SHORT);
       return;
     }
-
     Alert.alert("Notification", toastMessage);
   };
 
@@ -47,6 +55,10 @@ export default function AdminNotifications() {
 
     if (!trimmedTitle || !trimmedMessage) {
       showToast("Please enter both title and message.");
+      return;
+    }
+    if (targetType === "class" && !classId) {
+      showToast("Select a class to target.");
       return;
     }
 
@@ -59,27 +71,29 @@ export default function AdminNotifications() {
         {
           title: trimmedTitle,
           message: trimmedMessage,
-          targetType: "ALL",
+          targetType,
+          targetValue: targetType === "class" ? classId : null,
+          targetRole: null,
           createdBy: auth.currentUser?.uid as string,
+          createdByRole: "admin",
           createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
           isActive: true,
-          readReceipt: false,
-          readAt: null,
           readBy: [],
-          targetValue: "",
         },
       );
 
       setTitle("");
       setMessage("");
-      showToast("Notification added successfully.");
+      setTargetType("school");
+      setClassId(null);
+      showToast("Notification sent.");
     } catch (error) {
       console.error("Failed to add notification:", error);
       showToast("Failed to add notification.");
     }
   };
 
-  console.log("eee: app/admin/index.tsx | user:", userInfo);
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
@@ -88,7 +102,7 @@ export default function AdminNotifications() {
           Hi {userInfo?.fullName || "Admin"},
         </Text>
         <Text style={styles.subHeading}>
-          Publish announcements to all students & parents
+          Publish announcements to the whole school or a single class
         </Text>
 
         <View style={styles.inputContainer}>
@@ -111,6 +125,23 @@ export default function AdminNotifications() {
             multiline
           />
         </View>
+
+        <SelectField
+          label="Audience"
+          options={TARGET_TYPES}
+          value={targetType}
+          onChange={(v) => setTargetType((v as NotificationTargetType) ?? "school")}
+        />
+
+        {targetType === "class" && (
+          <SelectField
+            label="Class"
+            placeholder="Select class"
+            options={classOptions.map((c) => ({ label: c.label, value: c.id }))}
+            value={classId}
+            onChange={setClassId}
+          />
+        )}
 
         <TouchableOpacity style={styles.button} onPress={handleSend}>
           <Text style={styles.buttonText}>Send Notification</Text>

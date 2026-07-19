@@ -1,27 +1,15 @@
 import CustomHeader from "@/components/CustomHeader";
 import HeaderRight from "@/components/HeaderRight";
 import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserContext } from "../../context/UserContext";
 import { auth } from "../../utils/authClient";
 
+// Only screens with real v2 data behind them are in the drawer — see the
+// comment in app/pages/index.tsx for what's intentionally left unlinked.
 export default function RootLayoutLevel2() {
-  console.log("eee: app/pages/_layout.tsx");
-  const fullname = "";
-  const router = useRouter();
-  // const [menuVisible, setMenuVisible] = useState(false);
-
-  console.log("RootLayoutLevel2 rendered", auth.currentUser, fullname);
-
-  // const handleLogout = async () => {
-  //   await signOut(auth);
-  //   setMenuVisible(false);
-  //   router.replace("/(auth)/login");
-  // };
-
   return (
     <UserContext.Provider value={auth.currentUser}>
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -52,15 +40,6 @@ export default function RootLayoutLevel2() {
             }}
           />
           <Drawer.Screen
-            name="calendar"
-            options={{
-              title: "Calendar",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="calendar-month-outline" color={color} size={size} />
-              ),
-            }}
-          />
-          <Drawer.Screen
             name="attendance"
             options={{
               title: "Attendance",
@@ -74,87 +53,11 @@ export default function RootLayoutLevel2() {
             }}
           />
           <Drawer.Screen
-            name="homework"
-            options={{
-              title: "Homework",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="book-open-outline" color={color} size={size} />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="notes"
-            options={{
-              title: "Academic Notes",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="note-outline" color={color} size={size} />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="video"
-            options={{
-              title: "Academic Video",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="video-outline" color={color} size={size} />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="previous-year-question-paper"
-            options={{
-              title: "Previous Year Question Paper",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="file-document-outline" color={color} size={size} />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="apply-leave"
-            options={{
-              title: "Apply Leave",
-              drawerIcon: ({ color, size }) => (
-                <Icon
-                  name="calendar-remove-outline"
-                  color={color}
-                  size={size}
-                />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="daily-timetable"
-            options={{
-              title: "Daily Timetable",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="clock-outline" color={color} size={size} />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="download"
-            options={{
-              title: "Download",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="download-outline" color={color} size={size} />
-              ),
-            }}
-          />
-          <Drawer.Screen
             name="fees"
             options={{
               title: "Fees",
               drawerIcon: ({ color, size }) => (
                 <Icon name="cash-multiple" color={color} size={size} />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="news-gallery"
-            options={{
-              title: "News & Gallery",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="image-multiple-outline" color={color} size={size} />
               ),
             }}
           />
@@ -167,37 +70,21 @@ export default function RootLayoutLevel2() {
               ),
             }}
           />
-
+          <Drawer.Screen
+            name="calendar"
+            options={{
+              title: "Calendar",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="calendar-month-outline" color={color} size={size} />
+              ),
+            }}
+          />
           <Drawer.Screen
             name="profile"
             options={{
               title: "Profile",
               drawerIcon: ({ color, size }) => (
                 <Icon name="account-outline" color={color} size={size} />
-              ),
-            }}
-          />
-
-          <Drawer.Screen
-            name="circular"
-            options={{
-              title: "Circular",
-              drawerIcon: ({ color, size }) => (
-                <Icon name="file-document-outline" color={color} size={size} />
-              ),
-            }}
-          />
-
-          <Drawer.Screen
-            name="syllabus"
-            options={{
-              title: "Syllabus",
-              drawerIcon: ({ color, size }) => (
-                <Icon
-                  name="file-document-edit-outline"
-                  color={color}
-                  size={size}
-                />
               ),
             }}
           />

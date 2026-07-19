@@ -1,44 +1,94 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { StudentwithStringDate } from "../../store/slices/auth.type";
-import { useAppSelector } from "../../store/store";
+import { ClassDoc } from "@/firebaseSetup/fireBase.types";
+import { firestore } from "@/firebaseSetup/firebaseSetup";
+import { ParentWithStringDate } from "@/store/slices/auth.type";
+import { setSelectedChildId } from "@/store/slices/authSlice";
+import { AppState, useAppDispatch, useAppSelector } from "@/store/store";
+import { doc, getDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function DashboardScreen() {
-  const user: StudentwithStringDate = useAppSelector(
-    (state) => state.auth.userInfo,
-  ) as StudentwithStringDate;
+  const parent = useAppSelector(
+    (state: AppState) => state.auth.userInfo,
+  ) as ParentWithStringDate;
+  const { children, selectedChildId } = useAppSelector(
+    (state: AppState) => state.auth,
+  );
+  const dispatch = useAppDispatch();
+
+  const selectedChild = children.find((c) => c.id === selectedChildId);
+  const [className, setClassName] = useState("");
+
+  useEffect(() => {
+    if (!selectedChild?.classId) {
+      setClassName("");
+      return;
+    }
+    getDoc(doc(firestore, "classes", selectedChild.classId)).then((snap) => {
+      setClassName(snap.exists() ? (snap.data() as ClassDoc).name : "");
+    });
+  }, [selectedChild?.classId]);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>DASHBOARD</Text>
         <Text style={styles.headerSubtitle}>
-          {user?.fullname || "Student Name"} - Class {user?.class || ""}
+          Welcome, {parent?.fullName || "Parent"}
         </Text>
       </View>
 
-      <View style={styles.profileCard}>
-        <View style={styles.avatarCircle}>
-          <Text style={styles.avatarText}>
-            {user?.fullname ? user.fullname.charAt(0) : "S"}
-          </Text>
+      {children.length > 1 && (
+        <View style={styles.childSwitcher}>
+          {children.map((child) => (
+            <TouchableOpacity
+              key={child.id}
+              style={[
+                styles.childChip,
+                child.id === selectedChildId && styles.childChipActive,
+              ]}
+              onPress={() => dispatch(setSelectedChildId(child.id))}
+            >
+              <Text
+                style={[
+                  styles.childChipText,
+                  child.id === selectedChildId && styles.childChipTextActive,
+                ]}
+              >
+                {child.fullName}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
-      </View>
+      )}
 
-      <View style={styles.infoSection}>
-        <InfoRow label="Admission No" value={user?.rollNumber || "-"} />
-        <InfoRow label="Student Type" value="Regular" />
-        <InfoRow label="Scholar No" value="-" />
-        <InfoRow label="Child ID" value="-" />
-        <InfoRow label="Roll No" value={user?.rollNumber || "-"} />
-        <InfoRow label="Aadhar Card" value="-" />
-        <InfoRow label="Date of Birth" value="-" />
-        <InfoRow label="Father's Name" value={user?.parentName || "-"} />
-        <InfoRow label="Father's Mobile No." value={user?.parentPhone || "-"} />
-        <InfoRow label="Mother's Name" value="-" />
-        <InfoRow label="Mother's Mobile No." value="-" />
-      </View>
-    </View>
+      {selectedChild ? (
+        <>
+          <View style={styles.profileCard}>
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarText}>
+                {selectedChild.fullName.charAt(0)}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.infoSection}>
+            <InfoRow label="Name" value={selectedChild.fullName} />
+            <InfoRow label="Class" value={className || "-"} />
+            <InfoRow label="Roll No" value={selectedChild.rollNumber} />
+            <InfoRow label="Gender" value={selectedChild.gender} />
+          </View>
+        </>
+      ) : (
+        <Text style={styles.emptyText}>No children linked to this account.</Text>
+      )}
+    </ScrollView>
   );
 }
 
@@ -69,22 +119,44 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 14,
   },
+  childSwitcher: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    padding: 16,
+  },
+  childChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#e5e7eb",
+  },
+  childChipActive: {
+    backgroundColor: "#4a90e2",
+  },
+  childChipText: {
+    color: "#374151",
+    fontWeight: "600",
+  },
+  childChipTextActive: {
+    color: "#fff",
+  },
   profileCard: {
     alignItems: "center",
-    marginTop: -40,
+    marginTop: 10,
     marginBottom: 20,
   },
   avatarCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: "#26a69a",
     justifyContent: "center",
     alignItems: "center",
     elevation: 4,
   },
   avatarText: {
-    fontSize: 48,
+    fontSize: 40,
     color: "#fff",
     fontWeight: "bold",
   },
@@ -111,5 +183,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#333",
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 40,
+    color: "#6b7280",
   },
 });

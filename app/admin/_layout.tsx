@@ -9,13 +9,8 @@ import { UserContext } from "../../context/UserContext";
 import { auth, signOut } from "../../utils/authClient";
 
 const AdminLayout = () => {
-  console.log("eee: app/admin/_layout.tsx");
-
-  const fullname = "";
   const router = useRouter();
   const [menuVisible, setMenuVisible] = useState(false);
-
-  console.log("RootLayoutLevel2 rendered", auth.currentUser, fullname);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -95,6 +90,87 @@ const AdminLayout = () => {
               title: "Add Student",
               drawerIcon: ({ color, size }) => (
                 <Icon name="account-plus-outline" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="create-teacher"
+            options={{
+              title: "Add Teacher",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="account-tie-outline" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="manage-teachers"
+            options={{
+              title: "Manage Teachers",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="account-tie-hat-outline" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="create-parent"
+            options={{
+              title: "Add Parent",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="account-heart-outline" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="manage-parents"
+            options={{
+              title: "Manage Parents",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="account-supervisor-outline" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="manage-students"
+            options={{
+              title: "Manage Students",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="account-school-outline" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="create-class"
+            options={{
+              title: "Create Class",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="google-classroom" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="manage-classes"
+            options={{
+              title: "Manage Classes",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="clipboard-text-outline" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="create-fee-structure"
+            options={{
+              title: "Create Fee Structure",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="cash-plus" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="manage-fees"
+            options={{
+              title: "Manage Fees",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="cash-multiple" color={color} size={size} />
               ),
             }}
           />
