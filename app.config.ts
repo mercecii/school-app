@@ -78,6 +78,7 @@ const config = (): ExpoConfig => ({
         },
       },
     ],
+    "@sentry/react-native",
   ],
   experiments: {
     typedRoutes: true,

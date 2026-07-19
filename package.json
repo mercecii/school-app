@@ -9,10 +9,13 @@
     "lint": "expo lint",
     "export-web": "npx expo export --platform web",
     "build-e2": "eas build -p android --profile e2",
+    "build-e2-store": "eas build -p android --profile e2-store",
+    "submit-e2-store": "eas submit -p android --profile e2-store",
     "build-e3": "eas build -p android --profile e3",
     "release": "eas submit -p android --profile release",
     "deploy-rules-dev": "firebase deploy --only firestore:rules --project ssr-juniors-dev",
-    "deploy-rules-prod": "firebase deploy --only firestore:rules --project ssr-juniors"
+    "deploy-rules-prod": "firebase deploy --only firestore:rules --project ssr-juniors",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -25,6 +28,7 @@
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@reduxjs/toolkit": "^2.11.2",
+    "@sentry/react-native": "~7.2.0",
     "expo": "~54.0.32",
     "expo-application": "~7.0.8",
     "expo-constants": "~18.0.13",

@@ -10,6 +10,8 @@ import {
   resolvePhoneLoginRole,
   ResolvePhoneLoginResult,
 } from "@/utils/phoneRoleAdoption";
+import { initSentry } from "@/utils/sentry";
+import * as Sentry from "@sentry/react-native";
 import {
   addNotificationReceivedListener,
   addNotificationResponseReceivedListener,
@@ -57,6 +59,8 @@ if (Platform.OS === "web") {
   require("../public/fonts.css");
 }
 
+initSentry();
+
 type Role = "admin" | "teacher" | "parent";
 
 type GateState =
@@ -99,7 +103,7 @@ async function fetchChildren(childStudentIds: string[]) {
   });
 }
 
-export default function RootLayout() {
+function RootLayout() {
   console.log("RootLayout rendered");
   return (
     <Provider store={store}>
@@ -107,6 +111,8 @@ export default function RootLayout() {
     </Provider>
   );
 }
+
+export default Sentry.wrap(RootLayout);
 
 function AuthGate() {
   const segments = useSegments();
@@ -127,7 +133,10 @@ function AuthGate() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u: AuthUser | null) => {
-      console.log("Auth state changed, user:", u);
+      // Log only the uid, not the whole native user object — logging it
+      // directly makes the RN devtools console formatter call the object's
+      // deprecated toJSON(), which prints a noisy RNFB warning every time.
+      console.log("Auth state changed, user:", u?.uid ?? null);
 
       if (u === undefined) return;
 
@@ -216,6 +225,14 @@ function AuthGate() {
           status: "link-error",
           message:
             "This phone number is already linked to a different account. Contact the school admin.",
+        });
+        return;
+      }
+      if (result.status === "deactivated") {
+        setGate({
+          status: "link-error",
+          message:
+            "This account has been deactivated. Contact the school admin.",
         });
         return;
       }
