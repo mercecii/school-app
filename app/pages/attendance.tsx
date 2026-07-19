@@ -3,8 +3,9 @@ import { firestore } from "@/firebaseSetup/firebaseSetup";
 import { AppState, useAppSelector } from "@/store/store";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const STATUS_COLORS: Record<string, string> = {
   present: "#1E88E5",
