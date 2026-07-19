@@ -4,26 +4,49 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "dev": {
+      "developmentClient": false,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
     "e2": {
       "developmentClient": false,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "staging"
+        "EXPO_PUBLIC_APP_ENV": "staging",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       },
       "android": {
-        "buildType": "apk",
-        "googleServicesFile": "./google-services.staging.json"
+        "buildType": "apk"
       }
     },
     "e3": {
       "developmentClient": false,
       "distribution": "store",
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "production"
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       },
       "android": {
-        "buildType": "app-bundle",
-        "googleServicesFile": "./google-services.prod.json"
+        "buildType": "app-bundle"
+      },
+      "autoIncrement": true
+    },
+    "e2-store": {
+      "developmentClient": false,
+      "distribution": "store",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "staging",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      },
+      "android": {
+        "buildType": "app-bundle"
       },
       "autoIncrement": true
     }
@@ -32,6 +55,11 @@
     "release": {
       "android": {
         "track": "production"
+      }
+    },
+    "e2-store": {
+      "android": {
+        "track": "internal"
       }
     }
   }
