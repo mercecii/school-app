@@ -1,6 +1,8 @@
 import SelectField from "@/components/SelectField";
-import { ClassDoc, TeacherDoc } from "@/firebaseSetup/fireBase.types";
+import { TeacherDoc } from "@/firebaseSetup/fireBase.types";
 import { firestore } from "@/firebaseSetup/firebaseSetup";
+import { isValidE164 } from "@/utils/phoneValidation";
+import { useClassOptions } from "@/utils/useClasses";
 import {
   collection,
   doc,
@@ -9,7 +11,6 @@ import {
   query,
   serverTimestamp,
   updateDoc,
-  where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
@@ -23,99 +24,85 @@ import {
   View,
 } from "react-native";
 
-type ClassRow = { id: string; data: ClassDoc };
 type TeacherRow = { id: string; data: TeacherDoc };
 
-export default function ManageClassesScreen() {
-  const [classes, setClasses] = useState<ClassRow[]>([]);
+export default function ManageTeachersScreen() {
   const [teachers, setTeachers] = useState<TeacherRow[]>([]);
+  const classOptions = useClassOptions();
 
   useEffect(() => {
-    const unsubClasses = onSnapshot(
-      query(collection(firestore, "classes"), orderBy("name")),
-      (snap) =>
-        setClasses(
-          snap.docs.map((d) => ({ id: d.id, data: d.data() as ClassDoc })),
-        ),
-    );
-    const unsubTeachers = onSnapshot(
-      query(collection(firestore, "teachers"), where("isActive", "==", true)),
+    const unsubscribe = onSnapshot(
+      query(collection(firestore, "teachers"), orderBy("fullName")),
       (snap) =>
         setTeachers(
           snap.docs.map((d) => ({ id: d.id, data: d.data() as TeacherDoc })),
         ),
     );
-    return () => {
-      unsubClasses();
-      unsubTeachers();
-    };
+    return unsubscribe;
   }, []);
-
-  const teacherOptions = teachers.map((t) => ({
-    label: t.data.fullName,
-    value: t.id,
-  }));
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.heading}>Manage Classes</Text>
+      <Text style={styles.heading}>Manage Teachers</Text>
       <Text style={styles.subHeading}>
-        Fix a class&apos;s details, assign a homeroom teacher, or turn a
-        class off. If the teacher hasn&apos;t logged in yet, the assignment
-        still saves — access syncs automatically once they do.
+        Fix a wrong phone number, change assigned classes, or turn a teacher
+        off if they leave. Changing the phone number only matters before
+        they&apos;ve logged in for the first time — after that, changing it
+        here just corrects the record for next time.
       </Text>
 
-      {classes.map((c) => (
-        <ClassCard key={c.id} row={c} teacherOptions={teacherOptions} />
+      {teachers.map((t) => (
+        <TeacherCard key={t.id} row={t} classOptions={classOptions} />
       ))}
 
-      {classes.length === 0 && (
-        <Text style={styles.emptyText}>No classes yet — create one first.</Text>
+      {teachers.length === 0 && (
+        <Text style={styles.emptyText}>No teachers yet.</Text>
       )}
     </ScrollView>
   );
 }
 
-function ClassCard({
+function TeacherCard({
   row,
-  teacherOptions,
+  classOptions,
 }: {
-  row: ClassRow;
-  teacherOptions: { label: string; value: string }[];
+  row: TeacherRow;
+  classOptions: { id: string; label: string }[];
 }) {
-  const [grade, setGrade] = useState(row.data.grade);
-  const [section, setSection] = useState(row.data.section);
-  const [academicYear, setAcademicYear] = useState(row.data.academicYear);
-  const [classTeacherId, setClassTeacherId] = useState<string | null>(
-    row.data.classTeacherId,
-  );
+  const [fullName, setFullName] = useState(row.data.fullName);
+  const [email, setEmail] = useState(row.data.email);
+  const [phone, setPhone] = useState(row.data.phone);
+  const [classIds, setClassIds] = useState<string[]>(row.data.classIds);
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    const trimmedGrade = grade.trim();
-    const trimmedSection = section.trim();
-    const trimmedYear = academicYear.trim();
+    const trimmedName = fullName.trim();
+    const trimmedPhone = phone.trim();
 
-    if (!trimmedGrade || !trimmedSection || !trimmedYear) {
-      Alert.alert("Missing fields", "Please fill all fields.");
+    if (!trimmedName || !trimmedPhone) {
+      Alert.alert("Missing fields", "Name and phone number are required.");
+      return;
+    }
+    if (!isValidE164(trimmedPhone)) {
+      Alert.alert(
+        "Invalid phone number",
+        "Enter the phone number in E.164 format (e.g. +919876543210).",
+      );
       return;
     }
 
     try {
       setSaving(true);
-      await updateDoc(doc(firestore, "classes", row.id), {
-        name: `Class ${trimmedGrade} - ${trimmedSection}`,
-        grade: trimmedGrade,
-        section: trimmedSection,
-        academicYear: trimmedYear,
-        classTeacherId,
-        // classTeacherUid is derived server-side by syncTeacherAuthz once
-        // that teacher has adopted — not set here.
+      await updateDoc(doc(firestore, "teachers", row.id), {
+        fullName: trimmedName,
+        email: email.trim(),
+        phone: trimmedPhone,
+        classIds,
         updatedAt: serverTimestamp(),
       });
-      Alert.alert("Saved", "Class updated.");
+      Alert.alert("Saved", "Teacher record updated.");
     } catch (error) {
-      console.error("Failed to update class:", error);
+      console.error("Failed to update teacher:", error);
       Alert.alert("Error", "Could not save changes. Please try again.");
     } finally {
       setSaving(false);
@@ -124,12 +111,12 @@ function ClassCard({
 
   const handleToggleActive = async (value: boolean) => {
     try {
-      await updateDoc(doc(firestore, "classes", row.id), {
+      await updateDoc(doc(firestore, "teachers", row.id), {
         isActive: value,
         updatedAt: serverTimestamp(),
       });
     } catch (error) {
-      console.error("Failed to toggle class active state:", error);
+      console.error("Failed to toggle teacher active state:", error);
       Alert.alert("Error", "Could not update status. Please try again.");
     }
   };
@@ -137,7 +124,7 @@ function ClassCard({
   return (
     <View style={[styles.card, !row.data.isActive && styles.cardInactive]}>
       <View style={styles.cardHeader}>
-        <Text style={styles.className}>{row.data.name}</Text>
+        <Text style={styles.cardTitle}>{row.data.fullName}</Text>
         <View style={styles.activeRow}>
           <Text style={styles.activeLabel}>
             {row.data.isActive ? "Active" : "Inactive"}
@@ -146,25 +133,31 @@ function ClassCard({
         </View>
       </View>
 
-      <Text style={styles.label}>Grade</Text>
-      <TextInput value={grade} onChangeText={setGrade} style={styles.input} />
-
-      <Text style={styles.label}>Section</Text>
-      <TextInput value={section} onChangeText={setSection} style={styles.input} />
-
-      <Text style={styles.label}>Academic Year</Text>
+      <Text style={styles.label}>Full Name</Text>
       <TextInput
-        value={academicYear}
-        onChangeText={setAcademicYear}
+        value={fullName}
+        onChangeText={setFullName}
         style={styles.input}
       />
 
+      <Text style={styles.label}>Email</Text>
+      <TextInput
+        value={email}
+        onChangeText={setEmail}
+        style={styles.input}
+        autoCapitalize="none"
+      />
+
+      <Text style={styles.label}>Phone (E.164)</Text>
+      <TextInput value={phone} onChangeText={setPhone} style={styles.input} />
+
       <SelectField
-        label="Homeroom Teacher"
-        placeholder="Unassigned"
-        options={teacherOptions}
-        value={classTeacherId}
-        onChange={setClassTeacherId}
+        label="Assigned Classes"
+        placeholder="Select classes taught"
+        options={classOptions.map((c) => ({ label: c.label, value: c.id }))}
+        value={classIds}
+        onChange={setClassIds}
+        multiple
       />
 
       <TouchableOpacity
@@ -216,6 +209,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 4,
   },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+    flexShrink: 1,
+  },
   activeRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -224,13 +223,6 @@ const styles = StyleSheet.create({
   activeLabel: {
     fontSize: 12,
     color: "#6b7280",
-  },
-  className: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 4,
-    flexShrink: 1,
   },
   label: {
     fontSize: 14,

@@ -34,6 +34,18 @@ const dashboardItems = [
     ),
   },
   {
+    key: "manage-teachers",
+    route: "manage-teachers",
+    label: "MANAGE TEACHERS",
+    icon: (
+      <MaterialCommunityIcons
+        name="account-tie-hat-outline"
+        size={48}
+        color="#0f766e"
+      />
+    ),
+  },
+  {
     key: "create-parent",
     route: "create-parent",
     label: "ADD PARENT",
@@ -42,6 +54,30 @@ const dashboardItems = [
         name="account-heart-outline"
         size={48}
         color="#db2777"
+      />
+    ),
+  },
+  {
+    key: "manage-parents",
+    route: "manage-parents",
+    label: "MANAGE PARENTS",
+    icon: (
+      <MaterialCommunityIcons
+        name="account-supervisor-outline"
+        size={48}
+        color="#be185d"
+      />
+    ),
+  },
+  {
+    key: "manage-students",
+    route: "manage-students",
+    label: "MANAGE STUDENTS",
+    icon: (
+      <MaterialCommunityIcons
+        name="account-school-outline"
+        size={48}
+        color="#4338ca"
       />
     ),
   },

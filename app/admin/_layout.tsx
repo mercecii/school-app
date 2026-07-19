@@ -9,13 +9,8 @@ import { UserContext } from "../../context/UserContext";
 import { auth, signOut } from "../../utils/authClient";
 
 const AdminLayout = () => {
-  console.log("eee: app/admin/_layout.tsx");
-
-  const fullname = "";
   const router = useRouter();
   const [menuVisible, setMenuVisible] = useState(false);
-
-  console.log("RootLayoutLevel2 rendered", auth.currentUser, fullname);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -108,11 +103,38 @@ const AdminLayout = () => {
             }}
           />
           <Drawer.Screen
+            name="manage-teachers"
+            options={{
+              title: "Manage Teachers",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="account-tie-hat-outline" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
             name="create-parent"
             options={{
               title: "Add Parent",
               drawerIcon: ({ color, size }) => (
                 <Icon name="account-heart-outline" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="manage-parents"
+            options={{
+              title: "Manage Parents",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="account-supervisor-outline" color={color} size={size} />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="manage-students"
+            options={{
+              title: "Manage Students",
+              drawerIcon: ({ color, size }) => (
+                <Icon name="account-school-outline" color={color} size={size} />
               ),
             }}
           />

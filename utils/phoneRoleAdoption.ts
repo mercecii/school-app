@@ -36,6 +36,7 @@ export type PhoneLoginCollection = "teachers" | "parents";
 export type PhoneAdoptableDoc = {
   phone: string;
   authUid: string | null;
+  isActive: boolean;
 };
 
 type AuthUserLike = {
@@ -46,7 +47,8 @@ type AuthUserLike = {
 export type ResolvePhoneLoginResult<T> =
   | { status: "resolved"; id: string; data: T }
   | { status: "not-found" }
-  | { status: "already-adopted-by-other-account"; id: string };
+  | { status: "already-adopted-by-other-account"; id: string }
+  | { status: "deactivated" };
 
 async function findByAuthUid<T extends PhoneAdoptableDoc>(
   collectionName: PhoneLoginCollection,
@@ -94,7 +96,10 @@ export async function resolvePhoneLoginRole<T extends PhoneAdoptableDoc>(
   authUser: AuthUserLike,
 ): Promise<ResolvePhoneLoginResult<T>> {
   const byUid = await findByAuthUid<T>(collectionName, authUser.uid);
-  if (byUid) return { status: "resolved", ...byUid };
+  if (byUid) {
+    if (!byUid.data.isActive) return { status: "deactivated" };
+    return { status: "resolved", ...byUid };
+  }
 
   const authPhone = authUser.phoneNumber;
   if (!authPhone) return { status: "not-found" };
@@ -103,6 +108,7 @@ export async function resolvePhoneLoginRole<T extends PhoneAdoptableDoc>(
   if (!matched) return { status: "not-found" };
 
   if (matched.data.authUid === authUser.uid) {
+    if (!matched.data.isActive) return { status: "deactivated" };
     return { status: "resolved", id: matched.id, data: matched.data };
   }
   if (matched.data.authUid) {
@@ -111,6 +117,8 @@ export async function resolvePhoneLoginRole<T extends PhoneAdoptableDoc>(
       id: matched.id,
     };
   }
+  if (!matched.data.isActive) return { status: "deactivated" };
+
   const docRef = doc(firestore, collectionName, matched.id);
   await updateDoc(docRef, {
     authUid: authUser.uid,
